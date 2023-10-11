@@ -1,5 +1,5 @@
-# Sensor Data Repository
-
+# Autotent
+Ever since I came into the world of IOT and machine learning, I have dreamed of building a system to help me monitor and maintain my plants. 
 This repository contains data and scripts from various sensor experiments, including data collected from Arduino sensors and readings from Netatmo sensors.
 
 ## Folders and Contents
