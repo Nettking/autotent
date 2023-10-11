@@ -1,28 +1,37 @@
-# Autotent
-Ever since I came into the world of IOT and machine learning, I have dreamed of building a system to help me monitor and maintain my plants. 
-This repository contains data and scripts from various sensor experiments, including data collected from Arduino sensors and readings from Netatmo sensors.
+# AutoTent 1.0.0 - Initial Release
 
-## Folders and Contents
+AutoTent 1.0.0 has a Python script that provides a menu-driven interface to run various programs. It's designed to work on both Linux/macOS and Windows operating systems.
 
-### 1. Arduino Sensor Experiment
+## Getting Started
 
-- **Description**: Data and scripts related to an Arduino sensor experiment involving humidity readings.
-- **Folders**:
-  - `data/`: Contains the raw data collected during the Arduino Sensor Experiment.
-  - `process_raw_data/`: Contains scripts for processing and analyzing the raw data.
-  
-### 2. Netatmo Sensor Reading
+### Prerequisites
 
-- **Description**: Data collected from Netatmo sensors for environmental monitoring.
-- **Folders**:
-  - `netatmo_data/`: Contains data obtained from Netatmo sensors.
-  - `netatmo_scripts/`: Includes scripts for analyzing and visualizing Netatmo sensor readings.
+Before you can use AutoTent, make sure you have Python installed on your system.
 
-## Instructions
+### Installation
 
-- Each subdirectory contains its own `README.md` with detailed information about its contents and usage.
-- Refer to individual subdirectory `README.md` files for specific instructions on data processing, analysis, and script usage.
+1. Clone this repository to your local machine.
 
-## Dependencies
+```bash
+git clone https://github.com/your-username/autotent.git
+cd autotent
+```
+### Usage
+Run the AutoTent script to select and execute different programs:
+python run.py
 
-- Please review the `README.md` files within each subdirectory for specific dependencies and installation instructions.
+Program Options
+AutoTent offers the following program options:
+
+1. Calculate Error: Calculate error for sensor readings.
+2. Graph Error: Generate error graphs for sensor readings.
+3. Set Header Text: Modify header text for Python scripts.
+
+Select a program by entering the corresponding number.
+
+### Supported Operating Systems
+Linux
+macOS
+Windows
+The script automatically detects your operating system and adjusts the file paths accordingly.
+
