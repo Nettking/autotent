@@ -82,30 +82,31 @@ def collect_all():
 def init_monitoring():
     now = datetime.datetime.now().time()
     date_string = datetime.datetime.now().strftime("%Y-%m-%d")
-    print_string = date_string + ": Started at " + str(now.hour) + ":" + str(now.minute)
-    message = print_string
+    message = date_string + ": Started at " + str(now.hour) + ":" + str(now.minute)
     print_and_log(message)
 
-init_monitoring()
-collect_all()
-while True:
-    try:
-        # Get the current time
-        now = datetime.datetime.now().time()
-        
-        # Check if it's 05:59
-        if (now.hour == 5 and now.minute == 59):
-            # Capture the image
-            collect_all()
-            now_str = datetime.datetime.now()
-            date_string = now_str.strftime("%Y-%m-%d")
-            message = 'picture taken at ' + date_string 
-            print_and_log(message)
-            
-            # Sleep for 1 minute to prevent multiple captures in the same minute
-            time.sleep(60)
 
-        # Sleep for 1 second before checking the time again
-        time.sleep(1)
-    except:
-        pass
+if __name__ == "__main__":
+    init_monitoring()
+    collect_all()
+    while True:
+        try:
+            # Get the current time
+            now = datetime.datetime.now().time()
+            
+            # Check if it's 05:59
+            if (now.hour == 5 and now.minute == 59):
+                # Capture the image
+                collect_all()
+                now_str = datetime.datetime.now()
+                date_string = now_str.strftime("%Y-%m-%d")
+                message = 'picture taken at ' + date_string 
+                print_and_log(message)
+                
+                # Sleep for 1 minute to prevent multiple captures in the same minute
+                time.sleep(60)
+
+            # Sleep for 1 second before checking the time again
+            time.sleep(1)
+        except:
+            pass
