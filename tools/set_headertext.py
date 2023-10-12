@@ -4,7 +4,8 @@ import os
 directory_path = ''
 
 # Read the content of the headertext.txt file
-with open('tools\headertext.txt', 'r') as header_file:
+header_text_file_path = os.path.join('tools', 'headertext.txt')
+with open(header_text_file_path, 'r') as header_file:
     header_text = header_file.read()
 
 # Define a function to insert header text into Python files
