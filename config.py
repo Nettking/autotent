@@ -20,6 +20,7 @@ def set_script_paths_and_menu_options():
         os.path.join(common_path, 'calculate_error.py'),
         os.path.join(common_path, 'graph_error.py'),
         os.path.join(multi_sensor_path, 'graph_data.py'),
+        os.path.join('strawberries', 'plot_size.py'),
         os.path.join('tools', 'set_headertext.py')
     ]
     
@@ -27,7 +28,8 @@ def set_script_paths_and_menu_options():
         "1. Calculate Error",
         "2. Graph Error",
         "3. Graph data",
-        "4. Set Header Text"
+        "4. Graph stawberries",
+        "5. Set Header Text"
         
     ]
     
