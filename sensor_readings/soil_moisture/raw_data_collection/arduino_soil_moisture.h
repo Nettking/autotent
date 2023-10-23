@@ -19,6 +19,7 @@ void setup() {
 }
 
 void loop() {
+  
   if (millis() - lastReadingTime >= 24 * 60 * 60 * 1000) { // Check if 24 hours have passed
     File dataFile = SD.open("datalog.csv", FILE_WRITE);
     
@@ -77,5 +78,5 @@ void loop() {
     lastReadingTime = millis(); // Update the last reading time
   }
 
-  delay(1000);  // Sleep for a bit to avoid constantly checking the time
+  delay(24*60*60*1000);  
 }
