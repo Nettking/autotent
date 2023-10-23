@@ -1,7 +1,7 @@
 import csv
 import matplotlib.pyplot as plt
 
-def gather_data_from_csv(csv_filename="sensor_readings/soil_moisture/data/datalog.csv"):
+def gather_data_from_csv(csv_filename="datalog.csv"):
     with open(csv_filename, "r") as f:
         reader = csv.DictReader(f)
         data = list(reader)
