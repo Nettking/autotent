@@ -1,0 +1,7 @@
+import "LeafDiseaseDetection.thingml"
+configuration MySystem {
+    instance detector : LeafDiseaseDetector
+}
+
+// Here you would set up the system, possibly connect it to other components,
+// and start the system.

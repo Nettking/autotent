@@ -1,0 +1,30 @@
+thing LeafDiseaseDetector {
+    required port imageProcessing {
+        // Declare the incoming and outgoing messages for this port
+        sends detectedDiseaseAreas : Int
+        receives imageInput
+    }
+    
+    statechart LeafDiseaseDetection init WaitingForImage {
+        state WaitingForImage {
+            on entry do
+                print("Ready to process images.")
+            end
+            transition -> ProcessingImage
+                event m : imageProcessing?imageInput
+        }
+        
+        state ProcessingImage {
+            on entry do
+                print("Processing image...")
+                // Simulate image processing and disease detection
+                let detectedAreas = 5
+                print("Disease detection complete. Detected areas: " + detectedAreas)
+                
+                // Send out the result
+                imageProcessing!detectedDiseaseAreas(detectedAreas)
+            end
+            transition -> WaitingForImage
+        }
+    }
+}
