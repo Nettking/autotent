@@ -1,5 +1,5 @@
-from machine_learning.load import model
-from machine_learning.preprocess import preprocess_image
+from load import model
+from preprocess import preprocess_image
 import numpy as np
 
 image_paths = ['path/to/your/new/image.jpg']
