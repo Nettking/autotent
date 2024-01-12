@@ -1,0 +1,159 @@
+import "pim_messages.thingml"
+import "javatimer.thingml"
+
+thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
+
+    required port timer {
+        sends timer_start, timer_cancel
+        receives timer_timeout
+    }
+
+    required port to_psm {
+        sends Plant_State
+    }
+    provided port from_psm {
+        receives dark_green_pixel_count, green_pixel_count, light_green_pixel_count, side_camera_height
+    }
+
+    property current_plant_state:String = "Idle"
+    property current_light_green_pixel_count:Double = 0
+    property current_green_pixel_count:Double = 0
+    property current_dark_green_pixel_count:Double = 0
+    property green_pixel_sum:Double = 0
+
+    statechart Plant_State init Germination {
+        state Germination {
+            on entry do
+                if (current_plant_state=="Germination") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do 
+                    current_plant_state = "Germination"
+                    to_psm!Plant_State(current_plant_state)
+                    timer!timer_start(10 * 24 * 60 * 60 * 1000) // 10 days in milliseconds
+                end
+            end
+            on exit timer!timer_cancel()
+
+            transition -> Dying_During_Germination
+            guard timer?timer_timeout
+            
+            transition -> Seedling
+            event height:from_psm?side_camera_height
+            guard height.h < 0
+            
+            
+        }
+
+        state Seedling {
+            on entry do
+                if (current_plant_state=="Seedling") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do 
+                    current_plant_state = "Seedling"
+                    to_psm!Plant_State(current_plant_state)
+                    timer!timer_start(14 * 24 * 60 * 60 * 1000) // 14 days in milliseconds
+                end
+            end
+            on exit {timer!timer_cancel()}
+            green_pixel_sum = current_light_green_pixel_count + current_green_pixel_count + current_dark_green_pixel_count
+            
+            transition -> Growing
+            guard current_light_green_pixel_count + current_green_pixel_count + current_dark_green_pixel_count > 0
+
+            transition -> Seedling
+            guard current_light_green_pixel_count + current_green_pixel_count + current_dark_green_pixel_count <= 0
+
+            transition -> Dying_During_Seedling
+            guard timer?timer_timeout
+
+            transition -> Seedling
+            event LGPC:from_psm?light_green_pixel_count
+            action do 
+                current_light_green_pixel_count = LGPC.c
+            end
+
+            transition -> Seedling
+            event GPC:from_psm?green_pixel_count
+            action do 
+                current_green_pixel_count = GPC.c
+            end
+
+            transition -> Seedling
+            event DGPC:from_psm?dark_green_pixel_count
+            action do 
+                current_dark_green_pixel_count = DGPC.c
+            end
+
+        }
+
+        state Growing {
+            on entry do
+                if (current_plant_state=="Seedling") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do 
+                    current_plant_state = "Growing"
+                    to_psm!Plant_State(current_plant_state)
+                    green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                end
+            end
+
+            transition Growing
+            event GPC:from_psm?green_pixel_count
+            guard GPC.c < 0
+            action do 
+                current_green_pixel_count = GPC.c
+            end
+
+            transition Dying_During_Growing
+            guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+            
+        }
+
+        state Fruting {
+            on entry do
+                current_plant_state = "Fruting"
+                to_psm!Plant_State(current_plant_state)
+            end
+            
+        }
+
+        state Dying_During_Germination {
+            on entry do
+                current_plant_state = "Dying During Germination"
+                to_psm!Plant_State(current_plant_state)
+            end
+        }
+
+        state Dying_During_Seedling {
+            on entry do
+                current_plant_state = "Dying During Seedling"
+                to_psm!Plant_State(current_plant_state)
+            end
+            
+        }
+
+        state Dying_During_Growing {
+            on entry do
+                current_plant_state = "Dying During Growing"
+                to_psm!Plant_State(current_plant_state)
+            end
+
+
+        }
+
+        state Dying_During_Fruting {
+            on entry do
+                current_plant_state = "Dying During Fruting"
+                to_psm!Plant_State(current_plant_state)
+            end
+
+        }
+
+    }
+}

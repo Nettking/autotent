@@ -1,7 +1,20 @@
-import "LeafDiseaseDetection.thingml"
-configuration MySystem {
-    instance detector : LeafDiseaseDetector
-}
+import "psm.thingml"
+import "pim.thingml"
+import "javatimer.thingml"
 
-// Here you would set up the system, possibly connect it to other components,
-// and start the system.
+configuration Plant_State {
+	instance T1:MQTTDriver
+	instance pim:PIM
+	instance timer:TimerJava
+
+	// PSM
+	connector T1.to_pim => pim.from_psm
+			
+	// PIM outwards 
+	connector pim.to_psm => T1.from_pim
+	
+	// Simulation
+	connector T1.MQTT over MQTT
+	connector pim.timer => timer.timer
+	connector timer.timer => pim.timer
+}
