@@ -2,11 +2,12 @@ import requests
 from datetime import datetime, timedelta
 
 api_key = 'L2V332HTWSCPSNBSGY7EPYSDF'
+api_key_2 = 'AM2VGQWMEQMCCLNLCYMYYFX6H'
 location = 'halden'
 
 def get_dates():
     # Define the start date as June 1st, 2023
-    start_date = datetime(2023, 7, 1)
+    start_date = datetime(2023, 8, 1)
 
     # Get today's date
     end_date = datetime.now()
