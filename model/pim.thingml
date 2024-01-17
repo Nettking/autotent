@@ -34,14 +34,18 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
                     timer!timer_start(10 * 24 * 60 * 60 * 1000) // 10 days in milliseconds
                 end
             end
-            on exit timer!timer_cancel()
+            on exit do 
+                timer!timer_cancel()
+            end 
+            
 
-            transition -> Dying_During_Germination
-            guard timer?timer_timeout
+            transition -> Dying_During_Germination 
+                event timeout:timer?timer_timeout
+            
             
             transition -> Seedling
-            event height:from_psm?side_camera_height
-            guard height.h < 0
+                event height:from_psm?side_camera_height
+                guard height.h > 0
             
             
         }
@@ -58,41 +62,40 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
                     timer!timer_start(14 * 24 * 60 * 60 * 1000) // 14 days in milliseconds
                 end
             end
-            on exit {timer!timer_cancel()}
-            green_pixel_sum = current_light_green_pixel_count + current_green_pixel_count + current_dark_green_pixel_count
-            
-            transition -> Growing
-            guard current_light_green_pixel_count + current_green_pixel_count + current_dark_green_pixel_count > 0
-
-            transition -> Seedling
-            guard current_light_green_pixel_count + current_green_pixel_count + current_dark_green_pixel_count <= 0
+            on exit do  
+                timer!timer_cancel()
+            end 
 
             transition -> Dying_During_Seedling
-            guard timer?timer_timeout
+                event timer?timer_timeout
+                        
+            transition -> Growing 
+                event LGPC:from_psm?light_green_pixel_count
+                guard LGPC.c > 0
+                action do
+                    current_light_green_pixel_count = LGPC.c
+                end
+            
+            transition -> Growing
+                event MGPC:from_psm?green_pixel_count
+                guard MGPC.c > 0
+                action do
+                    current_green_pixel_count = MGPC.c
+                end
 
-            transition -> Seedling
-            event LGPC:from_psm?light_green_pixel_count
-            action do 
-                current_light_green_pixel_count = LGPC.c
-            end
 
-            transition -> Seedling
-            event GPC:from_psm?green_pixel_count
-            action do 
-                current_green_pixel_count = GPC.c
-            end
-
-            transition -> Seedling
-            event DGPC:from_psm?dark_green_pixel_count
-            action do 
-                current_dark_green_pixel_count = DGPC.c
-            end
+            transition -> Growing
+                event DGPC:from_psm?dark_green_pixel_count
+                guard DGPC.c > 0
+                action do
+                    current_dark_green_pixel_count = DGPC.c
+                end
 
         }
 
         state Growing {
             on entry do
-                if (current_plant_state=="Seedling") do
+                if (current_plant_state=="Growing") do
                     // Dont do anything if its already in this state
                 end
                 else
@@ -102,56 +105,157 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
                     green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 end
             end
+            
+            transition -> Dying_During_Growing
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+            
+            transition -> Fruting
+                event DGPC:from_psm?dark_green_pixel_count
+                guard DGPC.c > current_green_pixel_count + current_light_green_pixel_count
+            
 
-            transition Growing
-            event GPC:from_psm?green_pixel_count
-            guard GPC.c < 0
-            action do 
-                current_green_pixel_count = GPC.c
-            end
-
-            transition Dying_During_Growing
-            guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
             
         }
 
         state Fruting {
             on entry do
-                current_plant_state = "Fruting"
-                to_psm!Plant_State(current_plant_state)
+            if (current_plant_state=="Fruting") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do
+                    current_plant_state = "Fruting"
+                    to_psm!Plant_State(current_plant_state)
+                    green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                end
             end
+            
+            transition -> Growing
+                event LGPC:from_psm?light_green_pixel_count
+                guard LGPC.c > current_dark_green_pixel_count
+                action do 
+                    current_light_green_pixel_count = LGPC.c
+                end
+
+            transition -> Growing
+                event MGPC:from_psm?green_pixel_count
+                guard MGPC.c > current_dark_green_pixel_count
+                action do 
+                    current_green_pixel_count = MGPC.c
+                end
+
+            transition -> Dying_During_Fruting
+                event DGPC:from_psm?dark_green_pixel_count
+                guard DGPC.c < green_pixel_sum
+            
             
         }
 
         state Dying_During_Germination {
             on entry do
-                current_plant_state = "Dying During Germination"
-                to_psm!Plant_State(current_plant_state)
+            if (current_plant_state=="Dying During Germination") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do
+                    current_plant_state = "Dying During Germination"
+                    to_psm!Plant_State(current_plant_state)
+                end
             end
+
+            transition -> Seedling
+                event height:from_psm?side_camera_height
+                guard height.h > 0
+
         }
 
         state Dying_During_Seedling {
             on entry do
-                current_plant_state = "Dying During Seedling"
-                to_psm!Plant_State(current_plant_state)
+            if (current_plant_state=="Dying During Seedling") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do
+                    current_plant_state = "Dying During Seedling"
+                    to_psm!Plant_State(current_plant_state)
+                end
             end
+
+            transition -> Seedling
+                event height:from_psm?side_camera_height
+                guard height.h > 0
             
         }
 
         state Dying_During_Growing {
             on entry do
-                current_plant_state = "Dying During Growing"
-                to_psm!Plant_State(current_plant_state)
+                if (current_plant_state=="Dying During Growing") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do
+                    current_plant_state = "Dying During Growing"
+                    to_psm!Plant_State(current_plant_state)
+                    green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                end
             end
 
+            transition -> Growing
+                event LGPC:from_psm?light_green_pixel_count
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                action do 
+                    current_light_green_pixel_count = LGPC.c
+                end
+
+            transition -> Growing
+                event MGPC:from_psm?green_pixel_count
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                action do 
+                    current_green_pixel_count = MGPC.c
+                end
+
+            transition -> Growing
+                event DGPC:from_psm?dark_green_pixel_count
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                action do 
+                    current_green_pixel_count = DGPC.c
+                end
 
         }
 
         state Dying_During_Fruting {
             on entry do
-                current_plant_state = "Dying During Fruting"
-                to_psm!Plant_State(current_plant_state)
+            if (current_plant_state=="Dying During Fruting") do
+                    // Dont do anything if its already in this state
+                end
+                else
+                do
+                    current_plant_state = "Dying During Fruting"
+                    to_psm!Plant_State(current_plant_state)
+                    green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                end
             end
+
+            transition -> Growing
+                event LGPC:from_psm?light_green_pixel_count
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                action do 
+                    current_light_green_pixel_count = LGPC.c
+                end
+
+            transition -> Growing
+                event MGPC:from_psm?green_pixel_count
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                action do 
+                    current_green_pixel_count = MGPC.c
+                end
+
+            transition -> Growing
+                event DGPC:from_psm?dark_green_pixel_count
+                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                action do 
+                    current_green_pixel_count = DGPC.c
+                end
 
         }
 
