@@ -16,5 +16,5 @@ configuration Plant_State {
 	// Simulation
 	connector T1.MQTT over MQTT
 	connector pim.timer => timer.timer
-	connector timer.timer => pim.timer
+	
 }
