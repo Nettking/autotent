@@ -1,0 +1,181 @@
+Hello! My name is Martin Arthur Andersen
+I am happy to be here today to present my progress in my Master Thesis: Monitoring Indoor Strawberry Cultivation
+I will present my motivation and why i chose this project, 
+the research questions, what I aim to achieve
+I will mention some central works and findings
+I will present my work and timeline for the remainder of the project.
+On my last slide I will ask some questions for recommendations from the research group
+
+Slide 2
+
+From an early age, I have been curious to explore the realms of IT and IoT. 
+
+I also have an interest for cultivating plants that yield edible produce. 
+
+In recent years, there has been a growing interest in indoor cultivation methods for various crops,
+aiming to optimize production efficiency, mitigate environmental challenges, and ensure a consistent supply of high-quality produce. 
+
+Therefore I am eager to establish a system that can effectively monitor strawberries. 
+By implementing such a system, I aim to ensure the well-being of my edible plants through automated tracking and timely warnings. 
+
+This is why I chose this project.
+
+Slide 3
+
+I am conducting a case study with strawberries where the goal is to Identify growth stages and determining plant health. 
+
+The success of the plant's growth is contingent upon understanding the stage of development, as each phase necessitates distinct optimal conditions. 
+
+In this project I have made some assumptions.
+
+I assume that a healthy strawberry plant will develop similarly to other healthy strawberry plants.
+I assume Strawberry plants, cultivated from seeds, go through a defined life cycle characterized by distinct phases. Under favorable conditions, plants seamlessly progress from one stage
+to the next, typically encompassing four developmental phases:
+Germination
+Sprout/Seedling
+Growth
+Fruiting
+Identifying the state of development of a plant is a potential use of a digital twin.
+I am developing a digital twin to identify and track the growth stage of the plant. 
+There are still some things on my todo
+
+Slide 4
+
+The research questions for my thesis revolves around one main question. How can cyber physical systems and machine learning be utilized for monitoring plants?
+To specify the area i am exploring, I have these four additional questions. The objective of this project is to design, build, and analyze a monitoring system for indoor strawberry cultivation.
+
+Therefore some additional questions were needed.
+
+What are the key requirements and components of a such monitoring system?
+What IoT devices and protocols should be employed to enable seamless communication and data exchange among various components in the indoor strawberry cultivation system?
+Which monitor algorithms can raise real time alerts on plant health?
+
+The system will monitor various environmental factors that affect plant growth. I am exploring digital twins and modelling, for improving the efficiency and productivity of agricultural practices by predicting the impact of environmental conditions, disease outbreaks, and other factors on crops. 
+
+
+Slide 5
+
+To explore these research questions I have conducted a literature review
+
+There were 7 papers included in total and these three are the most central for my thesis.
+
+A digital twin is a virtual representation or simulation of a physical object, process, or system. It is created using real-time data and other relevant information to model and mimic the behavior, characteristics, and performance of its real-world counterpart.
+
+I have found that
+There are deployments of digital twins in the domain of monitoring in agriculture that use predicting environmental variables to perform a proactive adjustment. 
+Three deployments were found with similarities in IoT components, sensor and actuation
+Deployments focus on optimizing production and energy consumption, scheduling harvests, and enhancing decision-making capabilities.
+The primary benefit of a digital twin in agriculture is decision support. 
+
+Machine learning has potential to be used for different predictions, filling out missing data and classifying plant health.
+Convolutional Neural Networks are recommended for image analysis due to their effectiveness.
+
+Slide 6
+
+Methodologies in agricultural process monitoring involve analyzing images for insights into crop health, predicting changes in environmental variables, and monitoring fluctuations in temperature, humidity, and soil composition to mitigate the impact of climate variations on crop yield.
+
+Data is collected using independent subsystems. The literature advocates for this approach mainly for two reasons: (1) Simple systems are simple to maintain and (2) each component can be developed, tested, and maintained separately, allowing for easier upgrades or replacements without disrupting the entire system.
+
+Observations are initially stored in a centralized database before undergoing analysis. In addition, a local record is maintained to address the possibility of network failures. As the volume of data increases, there is a proportional demand for computational resources. The literature advocates for cloud data processing services such as Amazon Web Services.
+
+To transport the messages across the system, MQTT has been used.
+To ensure every message is delivered only once MQTT QoS Level 2 have been used.
+
+These messages are stored at intervals of 30 minutes in the cloud
+
+For image data, it is recommended to sample every 6 hours, while environmental data should be sampled at 30-minute intervals. 
+Estimating missing data might be necessary.
+Redundancy may be required in data collection.
+
+Previous work tracks environmental variables and analyse plant health using machine learning. My work shall also track plant state
+
+
+Slide 7
+
+We will now examine the four developmental phases in the handouts you have been given.
+
+I have created a simple model to determine the strawberry plant’s state using ThingML. 
+
+The chosen states represent the key developmental phases in the life cycle of a strawberry plant. Each state signifies a distinct stage in growth, from germination as the starting point to fruiting as the culmination. 
+
+It is assumed that the plant is tracked from germination, but this is not a requirement. 
+If at any point something is wrong, and left unchecked the plant is considered dying.
+
+Slide 8
+
+ThingML, short for Thing Modeling Language, is a modeling language and associated toolset designed for the development of Internet of Things (IoT) systems and complex distributed systems. 
+It was made by researchers at University of Toronto. 
+It provides a platform-independent way to describe the behavior and structure of systems, making it easier to design, implement, and maintain IoT applications.
+
+ThingML can also serve as a valuable tool for communicating the functionality of IoT systems to agricultural experts who may not have specialized knowledge in information technology or the Internet of Things, facilitating collaboration and understanding across diverse domains.
+
+ThingML allows compilation to uml. Which is what you can see here. 
+
+The model will receive a stream of messages to keep track and report the growth stage. 
+These messages will contain the number of pixels in different RGB ranges. 
+These pixel counts come from analysing images from cameras in two different angles, from above and from the side.
+In this first version the total number of pixels pr image will be considered
+
+Germination is the initial stage in the life cycle of a strawberry plant. 
+During this period, the plant’s growth remains imperceptible above the soil surface. 
+The plant has little to no visible growth in this stage. 
+Meanwhile, the plant establishes a root system and usually produces a shoot that emerges within the first 7 days. 
+In some cases this process can take up to 14 days. 
+It is reasonable to assume that something is wrong if the strawberry plant has not sprouted within this period.  
+
+When we enter the germination stage a timer starts. 
+From here a healthy plant should go to the seedling phase.
+If the plant stays in the germination stage too long and the timer runs out, the plant will be assumed dying or dead and a warning will be raised.
+
+As i mentioned, a camera is monitoring the plant from the side. 
+As the initial shoot becomes visible when viewed from the side angle, the plant enters the seedling phase.
+
+From the seedling phase we can transition to the growth stage.
+Similarly to the germination stage, a timer is started when entering the seedling stage. 
+If this timer runs out, it will be an indication that something is wrong, and the plant is considered dying.
+
+Three different color ranges (light green, green and dark green) are tracked. 
+When any of these ranges are detected on the top camera, the plant is in the growth stage. 
+
+During the growth stage, the strawberry plant focuses on producing more leaves and increasing in size. 
+The number of leaves and the overall plant size increase. 
+This means that we expect the number of green pixels to increase.
+If the total number of green pixels decreases, it is assumed that something is wrong
+
+The plant can transition between growing and fruiting.
+Now this part is subject to change. As I will show in the next slide: 
+When detecting more colors I will change this behaviour.
+In the model you see here, the requirement to transition from growing into fruiting is when the number of dark green pixels exceed the number of green plus light green pixels.
+
+It's important to note that certain strawberry varieties may have different growth habits, and some may exhibit a more continuous growth and fruiting pattern than others. This model is tailored to the specy i chose for this project, Ostara.
+From the fruiting stage, if either the number of light green or green pixels exceed the number of dark, It will transition back into the growth stage.
+
+The plant doesn't exactly revert from fruiting back to vegetative growth within a single growing season, it does go through a natural cycle of growth, fruiting, dormancy, and then reinitiates growth to prepare for the next fruiting cycle in the following season. 
+
+Slide 9
+
+I currently have a few remaining tasks on my to-do list.
+Created growth experiment based on literature review.
+
+While conducting the growth experiment, I identified certain inaccuracies in the readings from the soil moisture sensor. Consequently, I conducted an experiment specifically focused on sensor drift.
+
+This investigation revealed that moisture sensors demand regular maintenance and calibration for optimal functionality. To address this, I developed a straightforward digital twin. This digital twin operates by collecting and processing sensor data using Python. The processed image data is then transmitted to a model, which, in turn, provides an assessment of the plant state."
+
+I created a simple digital twin where the sensor data is collected and processed using Python.
+The processed image data is sent to the model and the model responds with the plant state.
+As you can see there are four tasks remaining. This brings me to my final slide.
+
+
+Slide 10
+
+I would like to ask for your recommendations.
+
+Do we need different dying-states for each plant development state or could it be one dying state?
+
+How to identify the transition from growing to fruiting stage?
+
+How do i validate my digital twin?
+
+How can the digital twin be fine-tuned to align with the preferences of agricultural experts?
+
+Thank you for your time!

@@ -7,7 +7,7 @@ location = 'halden'
 
 def get_dates():
     # Define the start date
-    start_date = datetime(2023, 11, 26)
+    start_date = datetime(2024, 1, 18)
 
     # Get today's date
     end_date = datetime.now()

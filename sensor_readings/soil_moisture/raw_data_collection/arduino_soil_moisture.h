@@ -1,10 +1,19 @@
 #include <SPI.h>
 #include <SD.h>
+#include <PubSubClient.h>
+#include <Ethernet.h>
+
+// Ethernet shield settings
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+IPAddress broker(192, 168, 1, 100); // Replace with your MQTT broker's IP address
 
 const int chipSelect = 4;
-int sensorPins[] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
+int sensorPins[] = {A0, A1};
 unsigned long startTime;
 unsigned long lastReadingTime = 0;
+
+EthernetClient ethClient;
+PubSubClient client(ethClient);
 
 void setup() {
   Serial.begin(9600);
@@ -14,12 +23,21 @@ void setup() {
     while (1);
   }
   
+  // Initialize Ethernet and MQTT client
+  Ethernet.begin(mac);
+  client.setServer(broker, 1883);
+
   startTime = millis();  // Record the start time of the experiment
   Serial.println("Card initialized.");
 }
 
 void loop() {
-  
+  if (!client.connected()) {
+    reconnect();
+  }
+
+  client.loop();
+
   if (millis() - lastReadingTime >= 24 * 60 * 60 * 1000) { // Check if 24 hours have passed
     File dataFile = SD.open("datalog.csv", FILE_WRITE);
     
@@ -45,6 +63,8 @@ void loop() {
           dataFile.print(sensorValue);
           dataFile.print(",");
           dataFile.println(calculatedHumidity);
+
+          publishToMQTT(i, sensorValue, calculatedHumidity);
           
           delay(150);  // Delay between each reading
         }
@@ -62,6 +82,8 @@ void loop() {
           dataFile.print(sensorValue);
           dataFile.print(",");
           dataFile.println(calculatedHumidity);
+
+          publishToMQTT(i, sensorValue, calculatedHumidity);
           
           delay(150);  // Delay between each reading
         }
@@ -79,4 +101,26 @@ void loop() {
   }
 
   delay(24*60*60*1000);  
+}
+
+void publishToMQTT(int sensorIndex, int sensorValue, float calculatedHumidity) {
+  String topic = "sensor_data/A" + String(sensorIndex);
+  String payload = "{\"Timestamp\": " + String(millis()) + ", \"SensorValue\": " + String(sensorValue) + ", \"Humidity\": " + String(calculatedHumidity) + "}";
+  
+  client.publish(topic.c_str(), payload.c_str());
+  Serial.println("Published to MQTT: " + topic + " - " + payload);
+}
+
+void reconnect() {
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    if (client.connect("arduino-client")) {
+      Serial.println("connected");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      delay(5000);
+    }
+  }
 }
