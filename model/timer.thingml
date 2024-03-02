@@ -11,7 +11,7 @@ thing fragment TimerMsgs {
 	// Cancel the Timer
 	message timer_cancel()@debug "false"; 
 	// Notification that the timer has expired
-	message timer_timeout();  
+	message timer_timeout(id : Integer);  
 }
 
 thing fragment Timer includes TimerMsgs
