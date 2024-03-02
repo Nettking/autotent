@@ -20,6 +20,7 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
     property current_green_pixel_count:Double = 0
     property current_dark_green_pixel_count:Double = 0
     property green_pixel_sum:Double = 0
+    property section_id:Integer
 
     statechart Plant_State init Germination {
         state Germination {
@@ -41,11 +42,12 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
 
             transition -> Dying_During_Germination 
                 event timeout:timer?timer_timeout
+                guard timeout.id == section_id
             
             
             transition -> Seedling
                 event height:from_psm?side_camera_height
-                guard height.h > 0
+                guard height.id == section_id and height.h > 0
             
             
         }
@@ -67,18 +69,19 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
             end 
 
             transition -> Dying_During_Seedling
-                event timer?timer_timeout
+                event timout:timer?timer_timeout
+                guard timout.id == section_id
                         
             transition -> Growing 
                 event LGPC:from_psm?light_green_pixel_count
-                guard LGPC.c > 0
+                guard LGPC.id == section_id and LGPC.c > 0
                 action do
                     current_light_green_pixel_count = LGPC.c
                 end
             
             transition -> Growing
                 event MGPC:from_psm?green_pixel_count
-                guard MGPC.c > 0
+                guard MGPC.id == section_id and MGPC.c > 0
                 action do
                     current_green_pixel_count = MGPC.c
                 end
@@ -86,7 +89,7 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
 
             transition -> Growing
                 event DGPC:from_psm?dark_green_pixel_count
-                guard DGPC.c > 0
+                guard DGPC.id == section_id and DGPC.c > 0
                 action do
                     current_dark_green_pixel_count = DGPC.c
                 end
@@ -107,11 +110,21 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
             end
             
             transition -> Dying_During_Growing
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                event section:from_psm?green_pixel_count
+                guard section.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
             
+            transition -> Dying_During_Growing
+                event section:from_psm?light_green_pixel_count
+                guard section.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+            
+            transition -> Dying_During_Growing
+                event section:from_psm?dark_green_pixel_count
+                guard section.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+            
+
             transition -> Fruting
                 event DGPC:from_psm?dark_green_pixel_count
-                guard DGPC.c > current_green_pixel_count + current_light_green_pixel_count
+                guard DGPC.id == section_id and DGPC.c > current_green_pixel_count + current_light_green_pixel_count
             
 
             
@@ -132,21 +145,21 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
             
             transition -> Growing
                 event LGPC:from_psm?light_green_pixel_count
-                guard LGPC.c > current_dark_green_pixel_count
+                guard LGPC.id == section_id and LGPC.c > current_dark_green_pixel_count
                 action do 
                     current_light_green_pixel_count = LGPC.c
                 end
 
             transition -> Growing
                 event MGPC:from_psm?green_pixel_count
-                guard MGPC.c > current_dark_green_pixel_count
+                guard MGPC.id == section_id and MGPC.c > current_dark_green_pixel_count
                 action do 
                     current_green_pixel_count = MGPC.c
                 end
 
             transition -> Dying_During_Fruting
                 event DGPC:from_psm?dark_green_pixel_count
-                guard DGPC.c < green_pixel_sum
+                guard DGPC.id == section_id and DGPC.c < green_pixel_sum
             
             
         }
@@ -165,7 +178,7 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
 
             transition -> Seedling
                 event height:from_psm?side_camera_height
-                guard height.h > 0
+                guard height.id == section_id and height.h > 0
 
         }
 
@@ -183,7 +196,7 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
 
             transition -> Seedling
                 event height:from_psm?side_camera_height
-                guard height.h > 0
+                guard height.id == section_id and height.h > 0
             
         }
 
@@ -202,21 +215,21 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
 
             transition -> Growing
                 event LGPC:from_psm?light_green_pixel_count
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                guard LGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 action do 
                     current_light_green_pixel_count = LGPC.c
                 end
 
             transition -> Growing
                 event MGPC:from_psm?green_pixel_count
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                guard MGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 action do 
                     current_green_pixel_count = MGPC.c
                 end
 
             transition -> Growing
                 event DGPC:from_psm?dark_green_pixel_count
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                guard DGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 action do 
                     current_green_pixel_count = DGPC.c
                 end
@@ -238,21 +251,21 @@ thing PIM includes GeneralMsg, PixelMsg, PlantStateMsg, TimerMsgs {
 
             transition -> Growing
                 event LGPC:from_psm?light_green_pixel_count
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                guard LGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 action do 
                     current_light_green_pixel_count = LGPC.c
                 end
 
             transition -> Growing
                 event MGPC:from_psm?green_pixel_count
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                guard MGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 action do 
                     current_green_pixel_count = MGPC.c
                 end
 
             transition -> Growing
                 event DGPC:from_psm?dark_green_pixel_count
-                guard green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+                guard DGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
                 action do 
                     current_green_pixel_count = DGPC.c
                 end
