@@ -18,7 +18,7 @@ thing TimerJava includes Timer
     function startTimer(delay : Integer) do
         timer = `new java.util.Timer()`
         `java.util.TimerTask temp_task = new java.util.TimerTask(){public void run(){`        	
-        	timer!timer_timeout()
+        	timer!timer_timeout(1)
         `}};`
         timer_task = `temp_task`
         `` & timer & `.schedule(` & timer_task & `, ` & delay & `);`
