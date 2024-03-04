@@ -1,0 +1,410 @@
+thing MQTTDriver includes GeneralMsg , PixelMsg , PlantStateMsg {
+	required port to_pim {
+		sends dark_green_pixel_count sends green_pixel_count sends light_green_pixel_count sends side_camera_height
+	}
+	provided port from_pim {
+		receives Plant_State
+	}
+	provided port MQTT {
+		sends dark_green_pixel_count sends green_pixel_count sends light_green_pixel_count sends side_camera_height receives Plant_State
+	}
+	statechart behaviorMQTTDriver init Idle {
+		state Idle {
+			transition -> Idle
+			event put : MQTT?Plant_State
+			action do
+				to_pim!side_camera_height(1, "string", 0)
+				to_pim!dark_green_pixel_count(1, "string", 0)
+				to_pim!green_pixel_count(1, "string", 0)
+				to_pim!light_green_pixel_count(1, "string", 0)
+			end
+		}
+	}
+}
+thing PIM includes GeneralMsg , PixelMsg , PlantStateMsg , TimerMsgs {
+	required port timer {
+		sends timer_start sends timer_cancel receives timer_timeout
+	}
+	required port to_psm {
+		sends Plant_State
+	}
+	provided port from_psm {
+		receives dark_green_pixel_count receives green_pixel_count receives light_green_pixel_count receives side_camera_height
+	}
+	property current_plant_state : String = "Idle"
+	property current_light_green_pixel_count : Double = 0
+	property current_green_pixel_count : Double = 0
+	property current_dark_green_pixel_count : Double = 0
+	property green_pixel_sum : Double = 0
+	property section_id : Integer
+	statechart Plant_State init Germination {
+		state Germination {
+			on entry do
+				if (current_plant_state == "Germination") do
+				end
+				else do
+					current_plant_state = "Germination"
+					to_psm!Plant_State(current_plant_state)
+					timer!timer_start(10 * 24 * 60 * 60 * 1000)
+				end
+			end
+			on exit do
+				timer!timer_cancel()
+			end
+			transition -> Dying_During_Germination
+			event timeout : timer?timer_timeout
+			guard timeout.id == section_id
+			transition -> Seedling
+			event height : from_psm?side_camera_height
+			guard height.id == section_id and height.h > 0
+		}
+		state Seedling {
+			on entry do
+				if (current_plant_state == "Seedling") do
+				end
+				else do
+					current_plant_state = "Seedling"
+					to_psm!Plant_State(current_plant_state)
+					timer!timer_start(14 * 24 * 60 * 60 * 1000)
+				end
+			end
+			on exit do
+				timer!timer_cancel()
+			end
+			transition -> Dying_During_Seedling
+			event timout : timer?timer_timeout
+			guard timout.id == section_id
+			transition -> Growing
+			event LGPC : from_psm?light_green_pixel_count
+			guard LGPC.id == section_id and LGPC.c > 0
+			action do
+				current_light_green_pixel_count = LGPC.c
+			end
+			transition -> Growing
+			event MGPC : from_psm?green_pixel_count
+			guard MGPC.id == section_id and MGPC.c > 0
+			action do
+				current_green_pixel_count = MGPC.c
+			end
+			transition -> Growing
+			event DGPC : from_psm?dark_green_pixel_count
+			guard DGPC.id == section_id and DGPC.c > 0
+			action do
+				current_dark_green_pixel_count = DGPC.c
+			end
+		}
+		state Growing {
+			on entry do
+				if (current_plant_state == "Growing") do
+				end
+				else do
+					current_plant_state = "Growing"
+					to_psm!Plant_State(current_plant_state)
+					green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+				end
+			end
+			transition -> Dying_During_Growing
+			event section : from_psm?green_pixel_count
+			guard section.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			transition -> Dying_During_Growing
+			event section : from_psm?light_green_pixel_count
+			guard section.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			transition -> Dying_During_Growing
+			event section : from_psm?dark_green_pixel_count
+			guard section.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			transition -> Fruting
+			event DGPC : from_psm?dark_green_pixel_count
+			guard DGPC.id == section_id and DGPC.c > current_green_pixel_count + current_light_green_pixel_count
+		}
+		state Fruting {
+			on entry do
+				if (current_plant_state == "Fruting") do
+				end
+				else do
+					current_plant_state = "Fruting"
+					to_psm!Plant_State(current_plant_state)
+					green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+				end
+			end
+			transition -> Growing
+			event LGPC : from_psm?light_green_pixel_count
+			guard LGPC.id == section_id and LGPC.c > current_dark_green_pixel_count
+			action do
+				current_light_green_pixel_count = LGPC.c
+			end
+			transition -> Growing
+			event MGPC : from_psm?green_pixel_count
+			guard MGPC.id == section_id and MGPC.c > current_dark_green_pixel_count
+			action do
+				current_green_pixel_count = MGPC.c
+			end
+			transition -> Dying_During_Fruting
+			event DGPC : from_psm?dark_green_pixel_count
+			guard DGPC.id == section_id and DGPC.c < green_pixel_sum
+		}
+		state Dying_During_Germination {
+			on entry do
+				if (current_plant_state == "Dying During Germination") do
+				end
+				else do
+					current_plant_state = "Dying During Germination"
+					to_psm!Plant_State(current_plant_state)
+				end
+			end
+			transition -> Seedling
+			event height : from_psm?side_camera_height
+			guard height.id == section_id and height.h > 0
+		}
+		state Dying_During_Seedling {
+			on entry do
+				if (current_plant_state == "Dying During Seedling") do
+				end
+				else do
+					current_plant_state = "Dying During Seedling"
+					to_psm!Plant_State(current_plant_state)
+				end
+			end
+			transition -> Seedling
+			event height : from_psm?side_camera_height
+			guard height.id == section_id and height.h > 0
+		}
+		state Dying_During_Growing {
+			on entry do
+				if (current_plant_state == "Dying During Growing") do
+				end
+				else do
+					current_plant_state = "Dying During Growing"
+					to_psm!Plant_State(current_plant_state)
+					green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+				end
+			end
+			transition -> Growing
+			event LGPC : from_psm?light_green_pixel_count
+			guard LGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			action do
+				current_light_green_pixel_count = LGPC.c
+			end
+			transition -> Growing
+			event MGPC : from_psm?green_pixel_count
+			guard MGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			action do
+				current_green_pixel_count = MGPC.c
+			end
+			transition -> Growing
+			event DGPC : from_psm?dark_green_pixel_count
+			guard DGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			action do
+				current_green_pixel_count = DGPC.c
+			end
+		}
+		state Dying_During_Fruting {
+			on entry do
+				if (current_plant_state == "Dying During Fruting") do
+				end
+				else do
+					current_plant_state = "Dying During Fruting"
+					to_psm!Plant_State(current_plant_state)
+					green_pixel_sum = current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+				end
+			end
+			transition -> Growing
+			event LGPC : from_psm?light_green_pixel_count
+			guard LGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			action do
+				current_light_green_pixel_count = LGPC.c
+			end
+			transition -> Growing
+			event MGPC : from_psm?green_pixel_count
+			guard MGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			action do
+				current_green_pixel_count = MGPC.c
+			end
+			transition -> Growing
+			event DGPC : from_psm?dark_green_pixel_count
+			guard DGPC.id == section_id and green_pixel_sum < current_dark_green_pixel_count + current_green_pixel_count + current_light_green_pixel_count
+			action do
+				current_green_pixel_count = DGPC.c
+			end
+		}
+	}
+}
+object JTimerTask @java_type "java.util.TimerTask"
+object JTimer @java_type "java.util.Timer"
+thing TimerJava includes Timer @pim "Timer" @platform "java" {
+	property timer : JTimer
+	property timer_task : JTimerTask
+	function startTimer(delay : Integer) do
+		timer = `new java.util.Timer()`
+	`java.util.TimerTask temp_task = new java.util.TimerTask(){public void run(){`
+		timer!timer_timeout(1)
+	`}};`
+		timer_task = `temp_task`
+		`` & timer & `.schedule(` & timer_task & `, ` & delay & `);`
+	end
+	function cancel() do
+		if (not (timer_task == `null`)) do
+			`` & timer_task & `.cancel();`
+			`` & timer & `.purge();`
+		end
+	end
+	statechart SoftTimer init default {
+		state default {
+			internal
+			event m : timer?timer_start
+			guard m.delay > 0
+			action do
+				startTimer(m.delay)
+			end
+			internal cancel
+			event m : timer?timer_cancel
+			action cancel()
+		}
+	}
+}
+datatype Byte<1>
+	@type_checker "Integer"
+	@c_type "uint8_t"
+	@java_type "byte"
+	@js_type "byte"
+	@go_type "byte"
+datatype Char<1>
+	@type_checker "Integer"
+	@c_type "char"
+	@java_type "byte"
+	@js_type "byte"
+	@go_type "byte"
+datatype Boolean<1>
+	@type_checker "Boolean"
+	@c_type "bool"
+	@java_type "boolean"
+	@js_type "boolean"
+	@go_type "bool"
+datatype UInt8<1>
+	@type_checker "Integer"
+	@c_type "uint8_t"
+	@java_type "int"
+	@js_type "short"
+	@go_type "uint8"
+datatype Int8<1>
+	@type_checker "Integer"
+	@c_type "int8_t"
+	@java_type "int"
+	@js_type "short"
+	@go_type "int8"
+datatype UInt16<2>
+	@type_checker "Integer"
+	@c_type "uint16_t"
+	@java_type "int"
+	@js_type "int"
+	@go_type "uint16"
+datatype Int16<2>
+	@type_checker "Integer"
+	@c_type "int16_t"
+	@java_type "int"
+	@js_type "short"
+	@go_type "int16"
+datatype Int32<4>
+	@type_checker "Integer"
+	@c_type "int32_t"
+	@java_type "long"
+	@js_type "int"
+	@go_type "int32"
+datatype UInt32<4>
+	@type_checker "Integer"
+	@c_type "uint32_t"
+	@java_type "long"
+	@js_type "long"
+	@go_type "uint32"
+datatype Long<4>
+	@type_checker "Integer"
+	@c_type "uint32_t"
+	@java_type "long"
+	@js_type "long"
+	@go_type "uint32"
+datatype Int64<8>
+	@type_checker "Integer"
+	@c_type "int64_t"
+	@java_type "long"
+	@js_type "long"
+	@go_type "int64"
+datatype UInt64<8>
+	@type_checker "Integer"
+	@c_type "uint64_t"
+	@java_type "long"
+	@js_type "long"
+	@go_type "uint64"
+datatype Integer<2>
+	@type_checker "Integer"
+	@c_type "int16_t"
+	@java_type "int"
+	@js_type "short"
+	@go_type "int16"
+datatype Float<4>
+	@type_checker "Real"
+	@c_type "float"
+	@java_type "float"
+	@js_type "float"
+	@go_type "float32"
+datatype Double<8>
+	@type_checker "Real"
+	@c_type "double"
+	@java_type "double"
+	@js_type "double"
+	@go_type "float64"
+object String
+	@serializable
+	@c_type "char *"
+	@arduino_type "String"
+	@java_type "String"
+	@js_type "String"
+	@go_type "string"
+enumeration DigitalState as UInt8 {
+	LOW = 0
+	HIGH = 1
+}
+thing fragment GeneralMsg {
+	message prompt(txt : String)
+}
+thing fragment PixelMsg {
+	message light_green_pixel_count(id : Integer, txt : String, c : Double)
+	message green_pixel_count(id : Integer, txt : String, c : Double)
+	message dark_green_pixel_count(id : Integer, txt : String, c : Double)
+	message side_camera_height(id : Integer, txt : String, h : Double)
+}
+thing fragment PlantStateMsg {
+	message Plant_State(txt : String)
+}
+thing fragment TimerMsgs {
+	message timer_start(delay : Integer)
+	message timer_cancel()
+	@debug "false"
+	message timer_timeout(id : Integer)
+}
+thing fragment Timer includes TimerMsgs {
+	provided port timer {
+		sends timer_timeout receives timer_start receives timer_cancel
+	}
+}
+thing fragment TimerClient includes TimerMsgs {
+	required port timer {
+		sends timer_start sends timer_cancel receives timer_timeout
+	}
+}
+thing TimerClientMock includes TimerClient {
+}
+protocol MQTT
+	@serializer "JSON"
+	@mqtt_broker_address "localhost"
+	@mqtt_broker_port "1883"
+	@mqtt_publish_topic "publish_topic"
+	@mqtt_subscribe_topic "subscribe_topic"
+
+configuration Plant_State {
+	instance T1 : MQTTDriver
+	instance pim : PIM
+	instance timer : TimerJava
+	connector T1.to_pim => pim . from_psm
+	connector pim.to_psm => T1 . from_pim
+	connector T1.MQTT over MQTT
+	connector pim.timer => timer . timer
+}
