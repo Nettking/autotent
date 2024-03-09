@@ -1,0 +1,10 @@
+import "datatypes.thingml" from stl
+
+thing fragment GeneralMsg {
+    message prompt(txt:String) // meant to send a textual message out to the user
+    message messages(section_id:Integer, type:String, txt:String, value:Double);
+    message reply(id:Integer, content:String)
+    
+}
+
+

@@ -1,0 +1,50 @@
+/* This is the PSM the Platform Specific Model */
+/*** This version contains the simple simulated based on the MQTT PSM platform */
+
+/* This is the first very hard-coded Z-wave version 190105 */
+/* This version is very hardcoded for the openhabianpi version 190206 */
+
+/* This version has possibility to change the polling intervals for temperature */
+import "datatypes.thingml" from stl	
+import "pim_messages.thingml"
+
+protocol MQTT @serializer "JSON"
+  @mqtt_broker_address "localhost"
+  @mqtt_broker_port "1883" 
+  @mqtt_publish_topic "publish_topic"
+  @mqtt_subscribe_topic "subscribe_topic";
+
+thing MQTTDriver includes GeneralMsg {
+	required port to_pim {sends messages}
+	provided port from_pim {receives messages}
+	
+	//Only one MQTT port to receive the sensor values
+	provided port MQTT {
+		receives messages
+		sends messages
+	}
+
+	
+	
+	statechart behaviorMQTTDriver init Idle {
+				
+		state Idle{	
+			// Report incoming MQTT message to PIM
+			transition -> Idle
+			event messages:MQTT?messages
+			action do
+				to_pim!messages(messages.section_id, messages.type, messages.txt, messages.value)
+			end
+
+			// Report plantstate back
+			transition -> Idle
+			event messages:from_pim?messages
+			action do
+				MQTT!messages(messages.section_id, messages.type, messages.txt , messages.value)
+			end
+			
+			
+		}
+	}
+} // MQTTDriver
+

@@ -1,0 +1,253 @@
+import "pim_messages.thingml"
+import "javatimer.thingml"
+
+
+
+
+thing PIM includes GeneralMsg, TimerMsgs {
+
+    required port timer {
+        sends timer_start, timer_cancel
+        receives timer_timeout
+    }
+
+    required port to_psm {
+        sends reply
+    }
+    provided port from_psm {
+        receives messages
+    }
+    property number_of_sections:Integer = 10
+    property current_plant_state:String[10]
+    property current_side_camera_height:Double[10]
+    property current_light_green_pixel_count:Double[10]
+    property current_green_pixel_count:Double[10]
+    property current_dark_green_pixel_count:Double[10]
+    property current_red_pixel_count:Double[10]
+    property current_white_pixel_count:Double[10]
+    property current_yellow_pixel_count:Double[10]
+
+    property section_id:Integer = 0
+    
+    //Set using provided tool
+    property fruit_threshhold:Double = 10
+    
+    statechart Plant_State init InitSections {
+        state InitSections {
+            on entry do
+                section_id = section_id+1
+                println("Initializing Section with ID: "+section_id)
+                fork Section
+            end
+            transition -> InitSections
+            guard section_id < number_of_sections
+            transition -> InitCompleted
+            guard section_id == number_of_sections
+        }
+        final state InitCompleted {
+            
+        }
+        session Section init Running {
+            composite state Running init Germination keeps history {
+            state Germination {
+                on entry do
+                        timer!timer_start(10 * 24 * 60 * 60 * 1000) // 10 days in milliseconds
+                end
+                on exit do 
+                    timer!timer_cancel()
+                end 
+                
+
+                transition -> Dying_During_Germination_or_Seedling
+                    event timeout:timer?timer_timeout
+                    guard timeout.id == section_id
+                    action do 
+                        current_plant_state[section_id-1] = "Dying_During_Germination"
+                        to_psm!reply(section_id-1, current_plant_state[timeout.id])
+                    end
+                
+                
+                transition -> Seedling
+                    event messages:from_psm?messages
+                    guard 
+                        messages.type == "side_camera_height" or
+                        messages.type == "light_green_pixel_count" or 
+                        messages.type == "green_pixel_count" or 
+                        messages.type == "dark_green_pixel_count" and 
+                        messages.section_id == section_id and 
+                        messages.value > 0
+                        action do 
+                                if (messages.type == "side_camera_height") do 
+                                    current_side_camera_height[section_id-1] = messages.value
+                                end
+
+                                if (messages.type == "light_green_pixel_count") do 
+                                    current_light_green_pixel_count[section_id-1] = messages.value
+                                end
+                                
+                                if (messages.type == "green_pixel_count") do 
+                                    current_green_pixel_count[section_id-1] = messages.value
+                                end
+                                
+                                if (messages.type == "dark_green_pixel_count") do 
+                                    current_dark_green_pixel_count[section_id-1] = messages.value
+                                end  
+                                current_plant_state[messages.section_id] = "Seedling"
+                                to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                            end
+            }
+
+            state Seedling {
+                on entry do
+                        timer!timer_start(14 * 24 * 60 * 60 * 1000) // 14 days in milliseconds
+                end
+                on exit do  
+                    timer!timer_cancel()
+                end 
+
+                transition -> Dying_During_Germination_or_Seedling
+                    event timeout:timer?timer_timeout
+                    guard timeout.id == section_id
+                        action do 
+                            current_plant_state[section_id-1] = "Dying_During_Germination"
+                            to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                        end
+
+
+                transition -> Growing
+                    event messages:from_psm?messages
+                        guard 
+                            messages.type == "light_green_pixel_count" or 
+                            messages.type == "green_pixel_count" or 
+                            messages.type == "dark_green_pixel_count" and 
+                            messages.section_id == section_id and 
+                            messages.value > 0
+                                action do 
+                                    if (messages.type == "light_green_pixel_count") do 
+                                        current_light_green_pixel_count[section_id-1] = messages.value
+                                    end
+                                    
+                                    if (messages.type == "green_pixel_count") do 
+                                        current_green_pixel_count[section_id-1] = messages.value
+                                    end
+                                    
+                                    if (messages.type == "dark_green_pixel_count") do 
+                                        current_dark_green_pixel_count[section_id-1] = messages.value
+                                    end  
+
+                                    current_plant_state[section_id-1] = "Growing"
+                                    to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                end
+                            
+            }
+
+            state Growing {
+                transition -> Dying_During_Growing_or_Fruiting
+                    event messages:from_psm?messages
+                    guard 
+                        messages.type == "green_pixel_count" and
+                        messages.section_id == section_id and 
+                        messages.value < current_light_green_pixel_count[section_id-1]
+                            action do
+                                current_light_green_pixel_count[section_id-1] = messages.value
+                                current_plant_state[section_id-1] = "Dying_During_Growing"
+                                to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                            end
+
+                transition -> Fruting
+                    event messages:from_psm?messages
+                    guard
+                        messages.section_id == section_id and 
+                        messages.type == "red_pixel_count" or
+                        messages.type == "yellow_pixel_count" or
+                        messages.type == "white_pixel_count" and
+                        messages.value > fruit_threshhold and
+                        current_dark_green_pixel_count[section_id-1] > current_green_pixel_count[section_id-1] 
+                            action do 
+                                if (messages.type == "red_pixel_count") do 
+                                    current_red_pixel_count[section_id-1] = messages.value
+                                end
+                                
+                                if (messages.type == "yellow_pixel_count") do 
+                                    current_yellow_pixel_count[section_id-1] = messages.value
+                                end
+                                
+                                if (messages.type == "white_pixel_count") do 
+                                    current_white_pixel_count[section_id-1] = messages.value
+                                end  
+
+                                current_plant_state[section_id-1] = "Fruiting"
+                                to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                            end
+            }
+
+            state Fruting {
+            
+
+                transition -> Dying_During_Growing_or_Fruiting
+                    event messages:from_psm?messages
+                    guard 
+                        messages.section_id == section_id and 
+                        messages.type == "red_pixel_count" and
+                        messages.value < current_red_pixel_count 
+                        action do 
+                            current_red_pixel_count[section_id-1] = messages.value
+                            current_plant_state[section_id-1] = "Dying_During_Fruting"
+                            to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                        end
+                        
+                    
+                
+            }
+
+            state Dying_During_Germination_or_Seedling {
+                transition -> Seedling
+                        event messages:from_psm?messages
+                        guard 
+                            messages.type == "side_camera_height" or
+                            messages.type == "light_green_pixel_count" or 
+                            messages.type == "green_pixel_count" or 
+                            messages.type == "dark_green_pixel_count" and 
+                            messages.section_id == section_id and 
+                            messages.value > 0
+                            action do 
+                                    if (messages.type == "side_camera_height") do 
+                                        current_side_camera_height[section_id-1] = messages.value
+                                    end
+
+                                    if (messages.type == "light_green_pixel_count") do 
+                                        current_light_green_pixel_count[section_id-1] = messages.value
+                                    end
+                                    
+                                    if (messages.type == "green_pixel_count") do 
+                                        current_green_pixel_count[section_id-1] = messages.value
+                                    end
+                                    
+                                    if (messages.type == "dark_green_pixel_count") do 
+                                        current_dark_green_pixel_count[section_id-1] = messages.value
+                                    end  
+                                    current_plant_state[messages.section_id] = "Seedling"
+                                    to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                end
+
+            }
+
+            state Dying_During_Growing_or_Fruiting {
+                
+                transition -> Growing
+                    event messages:from_psm?messages
+                    guard  
+                        messages.section_id == section_id and 
+                        messages.type == "green_pixel_count" and
+                        messages.value < current_green_pixel_count
+                    action do 
+                        current_green_pixel_count = messages.value
+                        current_plant_state[section_id-1] = "Growing"
+                        to_psm!reply(section_id-1, current_plant_state[section_id-1]) 
+                    end
+                    
+                }
+            }
+        }
+    }
+}
