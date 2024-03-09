@@ -18,14 +18,14 @@ thing PIM includes GeneralMsg, TimerMsgs {
         receives messages
     }
     property number_of_sections:Integer = 10
-    property current_plant_state:String[10]
-    property current_side_camera_height:Double[10]
-    property current_light_green_pixel_count:Double[10]
-    property current_green_pixel_count:Double[10]
-    property current_dark_green_pixel_count:Double[10]
-    property current_red_pixel_count:Double[10]
-    property current_white_pixel_count:Double[10]
-    property current_yellow_pixel_count:Double[10]
+    property current_plant_state:String
+    property current_side_camera_height:Double
+    property current_light_green_pixel_count:Double
+    property current_green_pixel_count:Double
+    property current_dark_green_pixel_count:Double
+    property current_red_pixel_count:Double
+    property current_white_pixel_count:Double
+    property current_yellow_pixel_count:Double
 
     property section_id:Integer = 0
     
@@ -62,38 +62,38 @@ thing PIM includes GeneralMsg, TimerMsgs {
                     event timeout:timer?timer_timeout
                     guard timeout.id == section_id
                     action do 
-                        current_plant_state[section_id-1] = "Dying_During_Germination"
-                        to_psm!reply(section_id-1, current_plant_state[timeout.id])
+                        current_plant_state = "Dying_During_Germination"
+                        to_psm!reply(section_id-1, current_plant_state)
                     end
                 
                 
                 transition -> Seedling
                     event messages:from_psm?messages
                     guard 
-                        messages.type == "side_camera_height" or
-                        messages.type == "light_green_pixel_count" or 
-                        messages.type == "green_pixel_count" or 
-                        messages.type == "dark_green_pixel_count" and 
+                        messages.msg_type == "side_camera_height" or
+                        messages.msg_type == "light_green_pixel_count" or 
+                        messages.msg_type == "green_pixel_count" or 
+                        messages.msg_type == "dark_green_pixel_count" and 
                         messages.section_id == section_id and 
                         messages.value > 0
                         action do 
-                                if (messages.type == "side_camera_height") do 
-                                    current_side_camera_height[section_id-1] = messages.value
+                                if (messages.msg_type == "side_camera_height") do 
+                                    current_side_camera_height  = messages.value
                                 end
 
-                                if (messages.type == "light_green_pixel_count") do 
-                                    current_light_green_pixel_count[section_id-1] = messages.value
+                                if (messages.msg_type == "light_green_pixel_count") do 
+                                    current_light_green_pixel_count  = messages.value
                                 end
                                 
-                                if (messages.type == "green_pixel_count") do 
-                                    current_green_pixel_count[section_id-1] = messages.value
+                                if (messages.msg_type == "green_pixel_count") do 
+                                    current_green_pixel_count  = messages.value
                                 end
                                 
-                                if (messages.type == "dark_green_pixel_count") do 
-                                    current_dark_green_pixel_count[section_id-1] = messages.value
+                                if (messages.msg_type == "dark_green_pixel_count") do 
+                                    current_dark_green_pixel_count  = messages.value
                                 end  
                                 current_plant_state[messages.section_id] = "Seedling"
-                                to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                to_psm!reply(section_id-1, current_plant_state )
                             end
             }
 
@@ -109,34 +109,34 @@ thing PIM includes GeneralMsg, TimerMsgs {
                     event timeout:timer?timer_timeout
                     guard timeout.id == section_id
                         action do 
-                            current_plant_state[section_id-1] = "Dying_During_Germination"
-                            to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                            current_plant_state  = "Dying_During_Germination"
+                            to_psm!reply(section_id-1, current_plant_state )
                         end
 
 
                 transition -> Growing
                     event messages:from_psm?messages
                         guard 
-                            messages.type == "light_green_pixel_count" or 
-                            messages.type == "green_pixel_count" or 
-                            messages.type == "dark_green_pixel_count" and 
+                            messages.msg_type == "light_green_pixel_count" or 
+                            messages.msg_type == "green_pixel_count" or 
+                            messages.msg_type == "dark_green_pixel_count" and 
                             messages.section_id == section_id and 
                             messages.value > 0
                                 action do 
-                                    if (messages.type == "light_green_pixel_count") do 
-                                        current_light_green_pixel_count[section_id-1] = messages.value
+                                    if (messages.msg_type == "light_green_pixel_count") do 
+                                        current_light_green_pixel_count  = messages.value
                                     end
                                     
-                                    if (messages.type == "green_pixel_count") do 
-                                        current_green_pixel_count[section_id-1] = messages.value
+                                    if (messages.msg_type == "green_pixel_count") do 
+                                        current_green_pixel_count  = messages.value
                                     end
                                     
-                                    if (messages.type == "dark_green_pixel_count") do 
-                                        current_dark_green_pixel_count[section_id-1] = messages.value
+                                    if (messages.msg_type == "dark_green_pixel_count") do 
+                                        current_dark_green_pixel_count  = messages.value
                                     end  
 
-                                    current_plant_state[section_id-1] = "Growing"
-                                    to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                    current_plant_state  = "Growing"
+                                    to_psm!reply(section_id-1, current_plant_state )
                                 end
                             
             }
@@ -145,39 +145,39 @@ thing PIM includes GeneralMsg, TimerMsgs {
                 transition -> Dying_During_Growing_or_Fruiting
                     event messages:from_psm?messages
                     guard 
-                        messages.type == "green_pixel_count" and
+                        messages.msg_type == "green_pixel_count" and
                         messages.section_id == section_id and 
-                        messages.value < current_light_green_pixel_count[section_id-1]
+                        messages.value < current_light_green_pixel_count 
                             action do
-                                current_light_green_pixel_count[section_id-1] = messages.value
-                                current_plant_state[section_id-1] = "Dying_During_Growing"
-                                to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                current_light_green_pixel_count  = messages.value
+                                current_plant_state  = "Dying_During_Growing"
+                                to_psm!reply(section_id-1, current_plant_state )
                             end
 
                 transition -> Fruting
                     event messages:from_psm?messages
                     guard
                         messages.section_id == section_id and 
-                        messages.type == "red_pixel_count" or
-                        messages.type == "yellow_pixel_count" or
-                        messages.type == "white_pixel_count" and
+                        messages.msg_type == "red_pixel_count" or
+                        messages.msg_type == "yellow_pixel_count" or
+                        messages.msg_type == "white_pixel_count" and
                         messages.value > fruit_threshhold and
-                        current_dark_green_pixel_count[section_id-1] > current_green_pixel_count[section_id-1] 
+                        current_dark_green_pixel_count  > current_green_pixel_count  
                             action do 
-                                if (messages.type == "red_pixel_count") do 
-                                    current_red_pixel_count[section_id-1] = messages.value
+                                if (messages.msg_type == "red_pixel_count") do 
+                                    current_red_pixel_count  = messages.value
                                 end
                                 
-                                if (messages.type == "yellow_pixel_count") do 
-                                    current_yellow_pixel_count[section_id-1] = messages.value
+                                if (messages.msg_type == "yellow_pixel_count") do 
+                                    current_yellow_pixel_count  = messages.value
                                 end
                                 
-                                if (messages.type == "white_pixel_count") do 
-                                    current_white_pixel_count[section_id-1] = messages.value
+                                if (messages.msg_type == "white_pixel_count") do 
+                                    current_white_pixel_count  = messages.value
                                 end  
 
-                                current_plant_state[section_id-1] = "Fruiting"
-                                to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                current_plant_state  = "Fruiting"
+                                to_psm!reply(section_id-1, current_plant_state )
                             end
             }
 
@@ -188,12 +188,12 @@ thing PIM includes GeneralMsg, TimerMsgs {
                     event messages:from_psm?messages
                     guard 
                         messages.section_id == section_id and 
-                        messages.type == "red_pixel_count" and
+                        messages.msg_type == "red_pixel_count" and
                         messages.value < current_red_pixel_count 
                         action do 
-                            current_red_pixel_count[section_id-1] = messages.value
-                            current_plant_state[section_id-1] = "Dying_During_Fruting"
-                            to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                            current_red_pixel_count  = messages.value
+                            current_plant_state  = "Dying_During_Fruting"
+                            to_psm!reply(section_id-1, current_plant_state )
                         end
                         
                     
@@ -204,30 +204,30 @@ thing PIM includes GeneralMsg, TimerMsgs {
                 transition -> Seedling
                         event messages:from_psm?messages
                         guard 
-                            messages.type == "side_camera_height" or
-                            messages.type == "light_green_pixel_count" or 
-                            messages.type == "green_pixel_count" or 
-                            messages.type == "dark_green_pixel_count" and 
+                            messages.msg_type == "side_camera_height" or
+                            messages.msg_type == "light_green_pixel_count" or 
+                            messages.msg_type == "green_pixel_count" or 
+                            messages.msg_type == "dark_green_pixel_count" and 
                             messages.section_id == section_id and 
                             messages.value > 0
                             action do 
-                                    if (messages.type == "side_camera_height") do 
-                                        current_side_camera_height[section_id-1] = messages.value
+                                    if (messages.msg_type == "side_camera_height") do 
+                                        current_side_camera_height  = messages.value
                                     end
 
-                                    if (messages.type == "light_green_pixel_count") do 
-                                        current_light_green_pixel_count[section_id-1] = messages.value
+                                    if (messages.msg_type == "light_green_pixel_count") do 
+                                        current_light_green_pixel_count  = messages.value
                                     end
                                     
-                                    if (messages.type == "green_pixel_count") do 
-                                        current_green_pixel_count[section_id-1] = messages.value
+                                    if (messages.msg_type == "green_pixel_count") do 
+                                        current_green_pixel_count  = messages.value
                                     end
                                     
-                                    if (messages.type == "dark_green_pixel_count") do 
-                                        current_dark_green_pixel_count[section_id-1] = messages.value
+                                    if (messages.msg_type == "dark_green_pixel_count") do 
+                                        current_dark_green_pixel_count  = messages.value
                                     end  
                                     current_plant_state[messages.section_id] = "Seedling"
-                                    to_psm!reply(section_id-1, current_plant_state[section_id-1])
+                                    to_psm!reply(section_id-1, current_plant_state )
                                 end
 
             }
@@ -238,12 +238,12 @@ thing PIM includes GeneralMsg, TimerMsgs {
                     event messages:from_psm?messages
                     guard  
                         messages.section_id == section_id and 
-                        messages.type == "green_pixel_count" and
+                        messages.msg_type == "green_pixel_count" and
                         messages.value < current_green_pixel_count
                     action do 
                         current_green_pixel_count = messages.value
-                        current_plant_state[section_id-1] = "Growing"
-                        to_psm!reply(section_id-1, current_plant_state[section_id-1]) 
+                        current_plant_state  = "Growing"
+                        to_psm!reply(section_id-1, current_plant_state ) 
                     end
                     
                 }

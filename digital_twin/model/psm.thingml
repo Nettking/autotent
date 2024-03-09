@@ -33,14 +33,14 @@ thing MQTTDriver includes GeneralMsg {
 			transition -> Idle
 			event messages:MQTT?messages
 			action do
-				to_pim!messages(messages.section_id, messages.type, messages.txt, messages.value)
+				to_pim!messages(messages.section_id, messages.msg_type, messages.msg_txt, messages.value)
 			end
 
 			// Report plantstate back
 			transition -> Idle
 			event messages:from_pim?messages
 			action do
-				MQTT!messages(messages.section_id, messages.type, messages.txt , messages.value)
+				MQTT!messages(messages.section_id, messages.msg_type, messages.msg_txt , messages.value)
 			end
 			
 			
