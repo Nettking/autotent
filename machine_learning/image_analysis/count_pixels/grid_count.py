@@ -68,7 +68,7 @@ def count_leaves(image_path):
 
 def get_color_code(color):
     if color == 'light_green':
-        return (0, 255, 0)
+        return (144, 255, 144)
     elif color == 'medium_green':
         return (0, 255, 255)
     elif color == 'dark_green':
@@ -92,9 +92,15 @@ def process_images_in_directory(directory_path):
 def plot_line_graph(data, xlabel, ylabel, title):
     plt.figure(figsize=(10, 6))
 
+    colors = {
+                'light_green': (144/255, 255/255, 144/255),  
+                'medium_green': (62/255, 155/255, 12/255),  
+                'dark_green': (1/255, 100/255, 32/255)       
+            }
+
     for color, values in data.items():
         non_zero_values = [value for value in values if value != 0]
-        plt.plot(non_zero_values, marker='o', label=f'{color.capitalize()}')
+        plt.plot(non_zero_values, label=f'{color.capitalize()}', color=colors[color])
 
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
@@ -110,6 +116,8 @@ def process_images_in_directory_and_save_csv(directory_path, output_csv_path):
         if filename.endswith(".png") or filename.endswith(".jpg"):
             image_path = os.path.join(directory_path, filename)
             num_leaves, total_pixel_counts = count_leaves(image_path)
+
+            
 
             for color, count, total_pixel_count in zip(hsv_ranges.keys(), num_leaves, total_pixel_counts):
                 num_leaves_data[color].append(count)
@@ -145,4 +153,4 @@ num_leaves_data, total_pixel_counts_data = process_images_in_directory(directory
 
 # Plot line graphs
 #plot_line_graph(num_leaves_data, xlabel='Image Index', ylabel='Number of Leaves', title='Number of Leaves in Each Image')
-plot_line_graph(total_pixel_counts_data, xlabel='Image Index', ylabel='Total Pixel Count', title='Total Pixel Count in Each Image')
+plot_line_graph(total_pixel_counts_data, xlabel='Number of days', ylabel='Total Pixel Count', title='Total Pixel Count in Each Image')

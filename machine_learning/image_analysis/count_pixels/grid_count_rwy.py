@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from PIL import Image
 import csv
 
@@ -104,3 +105,63 @@ output_csv_path = "output_results.csv"
 
 # Process images in the directory and save results to CSV
 process_images_in_directory_and_save_csv(directory_path, output_csv_path)
+
+
+def plot_line_graph(data, xlabel, ylabel, title):
+    plt.figure(figsize=(10, 6))
+
+    for color, values in data.items():
+        non_zero_values = [value for value in values if value != 0]
+        plt.plot(non_zero_values, marker='o', label=f'{color.capitalize()}')
+
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.legend()
+    plt.show()
+
+def count_leaves(image_path):
+    image = Image.open(image_path)
+    image_np = np.array(image)
+
+    cropped_image = crop_image(image_np, crop_width=100)
+    image_bgr = cv2.cvtColor(cropped_image, cv2.COLOR_RGBA2BGR)
+    image_hsv = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2HSV)
+
+    images_with_contours = []
+    filtered_contours = []
+    total_pixel_counts = []
+
+    for color, (lower, upper) in hsv_ranges.items():
+        mask = cv2.inRange(image_hsv, np.array(lower), np.array(upper))
+        opening_mask = apply_morphological_operations(mask)
+
+        image_with_contours, contours, total_pixel_count = find_and_draw_contours(image_bgr, opening_mask, get_color_code(color), area_threshold, color)
+
+        images_with_contours.append(image_with_contours)
+        filtered_contours.append(contours)
+        total_pixel_counts.append(total_pixel_count)
+
+    # Return the number of leaves for each color
+    num_leaves = [len(contours) for contours in filtered_contours]
+    return num_leaves, total_pixel_counts
+
+def process_images_in_directory(directory_path):
+    num_leaves_data = {color: [] for color in hsv_ranges.keys()}
+    total_pixel_counts_data = {color: [] for color in hsv_ranges.keys()}
+
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".png") or filename.endswith(".jpg"):
+            image_path = os.path.join(directory_path, filename)
+            num_leaves, total_pixel_counts = count_leaves(image_path)
+
+            for color, count, total_pixel_count in zip(hsv_ranges.keys(), num_leaves, total_pixel_counts):
+                num_leaves_data[color].append(count)
+                total_pixel_counts_data[color].append(total_pixel_count)
+
+    return num_leaves_data, total_pixel_counts_data
+
+num_leaves_data, total_pixel_counts_data = process_images_in_directory(directory_path)
+
+plot_line_graph(total_pixel_counts_data, xlabel='Image Index', ylabel='Total Pixel Count', title='Total Pixel Count in Each Image')
+

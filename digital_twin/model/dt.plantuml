@@ -1,0 +1,38 @@
+@startuml
+
+participant CloudDatabase
+participant PlantStateModel
+participant PlantMonitoringSystem
+
+note over CloudDatabase: Store Optimal Conditions
+CloudDatabase -> CloudDatabase: storeOptimalConditions()
+
+note over CloudDatabase: Store Previous Plant State
+CloudDatabase -> CloudDatabase: storePreviousPlantState()
+
+note over CloudDatabase: Store Image Data
+CloudDatabase -> CloudDatabase: storeImage()
+CloudDatabase -> CloudDatabase: storeImageMetadata()
+
+note over CloudDatabase: Store Sensor Data
+CloudDatabase -> CloudDatabase: storeSensorData()
+
+note over PlantMonitoringSystem: Track Plant State
+PlantMonitoringSystem -> PlantMonitoringSystem: trackPlantState()
+
+note over PlantMonitoringSystem: Determine Optimal Conditions
+PlantMonitoringSystem -> PlantMonitoringSystem: determineOptimalConditions()
+
+note over PlantMonitoringSystem: Forecast Environmental Variables
+PlantMonitoringSystem -> PlantMonitoringSystem: forecastEnvironmentalVariables()
+
+note over PlantMonitoringSystem: Report Future Conditions
+PlantMonitoringSystem -> PlantMonitoringSystem: reportFutureConditions()
+
+note over PlantStateModel: Receive Processed Image Data
+PlantMonitoringSystem -> PlantStateModel: receiveProcessedImageData()
+
+note over PlantStateModel: Report Changes in Plant State
+PlantStateModel -> PlantStateModel: reportChangesInPlantState()
+
+@enduml

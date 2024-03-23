@@ -22,8 +22,6 @@ room_data_hourly = room_data_numeric.resample('H', on='Timestamp').mean().astype
 
 forecast_data = pd.read_csv("weather_forecast.csv", delimiter=",", skiprows=1, names=["Timestamp", "Temperature_Forecast"])
 forecast_data["Timestamp"] = pd.to_datetime(forecast_data["Timestamp"], format="%Y-%m-%d %H:%M:%S")
-print(forecast_data)
-
 
 
 # Merge the datasets on timestamp using a left join

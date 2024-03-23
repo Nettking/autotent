@@ -17,7 +17,7 @@ thing PIM includes GeneralMsg, TimerMsgs {
     provided port from_psm {
         receives messages
     }
-    property number_of_sections:Integer = 10
+    property number_of_sections:Integer = 2
     property current_plant_state:String
     property current_side_camera_height:Double
     property current_light_green_pixel_count:Double
