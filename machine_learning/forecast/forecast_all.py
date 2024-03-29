@@ -128,16 +128,4 @@ for algorithm_name, algorithm in algorithms.items():
 
 # Concatenate all dataframes from methodologies into one for plotting
 all_predictions = pd.concat([methodology if isinstance(methodology, pd.DataFrame) else pd.concat(list(methodology.values())) for methodology in methodologies.values()])
-
-# Plotting predicted values vs real values for each variable
-for variable in numeric_columns:
-    plt.figure(figsize=(10, 6))
-    for col in all_predictions.columns:
-        if f"Predicted_{variable}" in col:
-            plt.plot(all_predictions.index, all_predictions[col], label=col)
-    plt.plot(all_predictions.index, all_predictions[variable], label=f"Real {variable}", color='blue')
-    plt.xlabel("Timestamp")
-    plt.ylabel(variable)
-    plt.title(f"{variable} - Real vs Predicted Values")
-    plt.legend()
-    plt.show()
+all_predictions.to_csv("all_predictions.csv")
