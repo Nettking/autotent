@@ -1,43 +1,29 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
-from io import StringIO
-
 
 # Load room data
 room_data = pd.read_csv("room_data.csv", delimiter=";")
 room_data["Timestamp"] = pd.to_datetime(room_data["Timezone : Europe/Oslo"])
 
-
 # Exclude non-numeric columns from aggregation
 numeric_columns = ["Temperature", "Humidity", "CO2", "Noise", "Pressure"]
 room_data_numeric = room_data[["Timestamp"] + numeric_columns]
 
-
-
 # Aggregate room data to hourly averages and convert to appropriate data type
 room_data_hourly = room_data_numeric.resample('H', on='Timestamp').mean().astype(float)
 
-
-
-forecast_data = pd.read_csv("weather_forecast.csv", delimiter=",", skiprows=1, names=["Timestamp", "Temperature_Forecast"])
-forecast_data["Timestamp"] = pd.to_datetime(forecast_data["Timestamp"], format="%Y-%m-%d %H:%M:%S")
-
-
-# Merge the datasets on timestamp using a left join
-merged_data = pd.merge(room_data_hourly, forecast_data, on="Timestamp", how="left")
-
-# Drop rows with missing values in forecast columns
-merged_data = merged_data.dropna(subset=["Temperature_Forecast"])
+# Reset index to make 'Timestamp' a regular column again
+room_data_hourly.reset_index(inplace=True)
 
 # Feature selection
-features = merged_data[["Temperature_Forecast"]]
+features = room_data_hourly.drop(columns=["Timestamp"])
 
 # Target variables
-target_variables = merged_data[numeric_columns]
+target_variables = room_data_hourly[numeric_columns]
 
 # Drop rows with missing values in target variables
-merged_data = merged_data.dropna(subset=numeric_columns)
+merged_data = room_data_hourly.dropna(subset=numeric_columns)
 
 # Train the linear regression model for each variable
 models = {}
@@ -69,6 +55,3 @@ for variable in target_variables.columns:
     plt.title(f"{variable} - Real vs Predicted Values")
     plt.legend()
     plt.show()
-
-
-''''''
