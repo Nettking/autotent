@@ -30,9 +30,6 @@ merged_data = pd.merge(room_data_hourly, forecast_data, left_index=True, right_i
 # Handle missing values as per your chosen strategy
 merged_data.dropna(inplace=True) 
 
-
-
-
 # Set datasets and reset methodology_data after each type has been set
 methodology_data = merged_data
 m_data_2h = methodology_data.resample('2H').mean()
@@ -67,8 +64,6 @@ methodologies = {
         "24 datapoints": m_data_24p
     }
 }
-
-
 
 # Train models and make predictions
 for algorithm_name, algorithm in algorithms.items():
