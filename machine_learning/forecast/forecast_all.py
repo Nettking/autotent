@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
 from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 import time
@@ -48,7 +49,7 @@ methodology_data = merged_data
 algorithms = {
     "LR": LinearRegression(),
     "SVR": SVR(),
-    "GPR": GaussianProcessRegressor()
+    "GPR": GaussianProcessRegressor()#(kernel=C(1.0, (1e-3, 1e5)) * RBF(10, (1e-2, 1e2)), optimizer='fmin_l_bfgs_b')
 }
 
 methodologies = {
@@ -79,20 +80,20 @@ for algorithm_name, algorithm in algorithms.items():
                 mse = ((predictions - target) ** 2).mean()
                 mape = mean_absolute_error(target, predictions) / target.abs().mean() * 100
                 end_time = time.time() 
-                print(f"{algorithm_name} - {methodology_name} (all data) - Temperature: MSE={mse}, MAPE={mape}%")
-                print(f"Runtime:  {end_time}-{start_time}")
+                print(f"{algorithm_name} - {methodology_name} (all data) - Temperature: MSE={str(mse)[:5]}, MAPE={str(mape)[:5]}%")
+                print(f"Runtime:  {end_time-start_time}")
             # Training for other variables using their historical values
             for variable in numeric_columns[1:]:
                 start_time = time.time()
-                features = methodology[numeric_columns]
+                features = methodology[[col for col in numeric_columns if col != variable]]
                 target = methodology[variable]
                 model = algorithm.fit(features, target)
                 predictions = model.predict(features)
                 mse = ((predictions - target) ** 2).mean()
                 mape = mean_absolute_error(target, predictions) / target.abs().mean() * 100
                 end_time = time.time() 
-                print(f"{algorithm_name} - {methodology_name} (all data) - {variable}: MSE={mse}, MAPE={mape}%")
-                print(f"Runtime:  {end_time}-{start_time}")
+                print(f"{algorithm_name} - {methodology_name} (all data) - {variable}: MSE={str(mse)[:5]}, MAPE={str(mape)[:5]}%")
+                print(f"Runtime:  {end_time-start_time}")
         else:
             for resample_name, resample_methodology in methodology.items():
                 # Training for Temperature using Temperature_Forecast
@@ -105,11 +106,11 @@ for algorithm_name, algorithm in algorithms.items():
                     mse = ((predictions - target) ** 2).mean()
                     mape = mean_absolute_error(target, predictions) / target.abs().mean() * 100
                     end_time = time.time()
-                    print(f"{algorithm_name} - {methodology_name} ({resample_name}) - Temperature: MSE={mse}, MAPE={mape}%")
-                    print(f"Runtime:  {end_time}-{start_time}")
+                    print(f"{algorithm_name} - {methodology_name} {resample_name} - Temperature: MSE={str(mse)[:5]}, MAPE={str(mape)[:5]}%")
+                    print(f"Runtime:  {end_time-start_time}")
                 for variable in numeric_columns[1:]:
                     start_time = time.time()
-                    features = resample_methodology[numeric_columns]
+                    features = resample_methodology[[col for col in numeric_columns if col != variable]]
                     target = resample_methodology[variable]
                     target = target.dropna()
                     features = features.dropna()
@@ -118,8 +119,8 @@ for algorithm_name, algorithm in algorithms.items():
                     mse = ((predictions - target) ** 2).mean()
                     mape = mean_absolute_error(target, predictions) / target.abs().mean() * 100
                     end_time = time.time()
-                    print(f"{algorithm_name} - {methodology_name} ({resample_name}) - ({variable}): MSE={mse}, MAPE={mape}%")
-                    print(f"Runtime:  {end_time}-{start_time}")
+                    print(f"{algorithm_name} - {methodology_name} ({resample_name}) - ({variable}): MSE={str(mse)[:5]}, MAPE={str(mape)[:5]}%")
+                    print(f"Runtime:  {end_time-start_time}")
 
 # Concatenate all dataframes from methodologies into one for plotting
 all_predictions = pd.concat([methodology if isinstance(methodology, pd.DataFrame) else pd.concat(list(methodology.values())) for methodology in methodologies.values()])
