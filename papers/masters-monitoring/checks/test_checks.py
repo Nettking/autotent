@@ -33,6 +33,13 @@ class PaperChecks(unittest.TestCase):
         self.assertTrue(used)
         self.assertEqual(used - keys, set())
 
+    def test_public_sources_do_not_reference_private_document(self):
+        root = Path(__file__).resolve().parents[1]
+        for name in ("main.tex", "references.bib", "README.md", "EVIDENCE.md"):
+            with self.subTest(path=name):
+                text = (root / name).read_text(encoding="utf-8")
+                self.assertNotRegex(text.lower(), r"\bthes(?:is|es)\b|master_thesis")
+
 
 if __name__ == "__main__":
     unittest.main()

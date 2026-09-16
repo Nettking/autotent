@@ -4,7 +4,7 @@ Prepared 16 September 2026 for the candidate paper. This register distinguishes 
 
 ## Source versions
 
-**T — thesis.** Martin Arthur Andersen, *Monitoring Indoor Strawberry Cultivation: Tracking Plant Development and Predicting Changes in Environmental Variables*. Author-supplied 109-page PDF. Printed page numbers are six below PDF page numbers for the cited main-text sections. The cover is dated 16 September 2026; no original degree/deposit year is inferred. The thesis itself is not committed here.
+**D — original development account.** The manuscript directly describes the author's monitoring design, test procedure, and qualitative development observations. These are not new experimental findings or independently reproduced runs. Working provenance is retained separately from the public package. No private document is cited or offered as an accessible publication, and no private bibliographic record or document locator is included here.
 
 **R — repository.** `Nettking/autotent`, default branch `final`, commit `814bb768aa9994b59e17437cb4964cefd3d11b0f`, tree `31930897139d581eb05fe826b973401683ae63e5`. All implementation claims refer to this version, not every historical deployment or generated binary.
 
@@ -24,19 +24,18 @@ Prepared 16 September 2026 for the candidate paper. This register distinguishes 
 
 | Manuscript content | Source | Evidence class and limit |
 |---|---|---|
-| Indoor setup, top and side cameras | T, sections 3.1 and 7.2, printed pp. 29-30 and 69; R public image | Historical design and example scene, not an independent sample count |
-| Image processor, Plant State Model, Python monitor, human-facing reports | T, sections 4.1-4.2 and figure 4.1, printed pp. 37-39 | Functional design; figure 2 summarizes it rather than claiming live execution |
-| Cropping, thresholding, contour measures, CSV | T, section 3.2.2, printed pp. 32-33; R green script | Source implementation; thesis RGB terminology differs from the HSV code |
-| HSV use for deterioration monitoring | T, section 5.5.5, printed p. 50 | Historical method description, not validated diagnosis |
-| Germination, seedling, growth, fruiting and distress interpretation | T, section 4.3, printed pp. 39-42; R PIM | Conceptual rules; table is not a corrected transcription of code guards |
-| Fourth-stage terminology | T, section 4.3 uses fruiting; section 6.4 uses flowering; R has `Fruting` / `Fruiting` | Documented discrepancy; categories are not silently merged for scoring |
-| Five-second MQTT replay and timer factor 1440 | T, section 5.5.2, printed p. 48 | Historical reported settings; no verified time-preserving replay |
-| 258 days hourly environmental data, six unusable image days | T, section 6.1, printed p. 51 | Historical reported counts, not recovered archive inventory or hourly images |
-| 252 image-days, expected transitions, initial two messages, distress/recovery | T, section 6.4, printed p. 52 | Developer-reported qualitative observations; no independent labels or accuracy |
-| Watering interventions and colour trajectory | T, section 5.1.1 and figure 5.1, printed pp. 44-45 | Historical interpretation only; intervention dates unavailable for image alignment |
+| Indoor setup, top and side cameras | D; R public image | Development setting and illustrative scene, not an independent sample count |
+| Image processor, Plant State Model, Python monitor, human-facing reports | D, stated directly in sections 3-4; R component files | Functional design; figure 2 does not claim current integrated execution |
+| Cropping, HSV thresholding, contour measures, CSV | R green script | Literal implementation, not a recalibrated or validated segmentation method |
+| Germination, seedling, growth, fruiting and distress interpretation | D; R PIM | Intended model categories; table 2 does not correct or validate the source guards |
+| Flowering versus fruiting | R PIM and the intended interpretation in section 4.2 | `Fruting`/`Fruiting` are software labels; flower- or fruit-related colour evidence does not establish biological stage |
+| Five-second MQTT replay and timer factor 1440 | D, stated directly in section 4.3 | Recorded development settings; not a newly reproduced or verified time-preserving replay |
+| 258 days of hourly environmental data, six unusable image days, 252 image-days | D, stated directly in section 5.2 | Historical collection account, not a recovered archive census or evidence of hourly images |
+| Expected transitions, two initialization messages, distress/recovery | D, stated directly in section 5.2 | Developer observations; no independent labels, linked execution trace, or accuracy estimate |
+| Watering sequence and feature changes | D, stated directly in section 5.2 | Historical interpretation; dates unavailable; no treatment-aligned labels or causal analysis |
 | Dates and partial acquisition success | A | Limited recovery inspection; no complete archive claim or failure rate |
-| Four checks in table 3 | `checks/check_archived_operations.py` and `checks/results.json` | New constructed software checks, not execution of original application or biological validation |
-| Retain provenance, distinguish missing values from zero, explicit replay time | Present analysis of T/R/A | Recommendations, not features claimed to exist in the historical implementation |
+| Four checks in table 3 | `checks/check_archived_operations.py` and `checks/results.json` | Constructed software checks, not execution of the original application or biological validation |
+| Retain provenance, distinguish missing values from zero, explicit replay time | Present analysis of D/R/A | Recommendations, not features claimed to exist in the historical implementation |
 
 ## New check method and constraints
 
@@ -47,7 +46,7 @@ The constants and the CSV/default-zero and plotting operations are manually tran
 - A non-zero constructed exporter-format CSV row read with the sender's expected field names and default-zero expression.
 - Two short constructed series subjected to the archived per-channel removal of zero values.
 
-The software reports the installed OpenCV/NumPy versions; those versions are **not** asserted to be the historical environment. Four check outcomes and one bibliography-integrity test passed when preparing the candidate. These outcomes verify the limited examples, not the original pipeline, ThingML compilation, MQTT round trip, scientific novelty, or submission readiness.
+The software reports the installed OpenCV/NumPy versions; those versions are **not** asserted to be the historical environment. The checker produces four source-level outcomes. Unit tests cover those outcomes, bibliography-key integrity, and a publication-source boundary check. These outcomes verify the limited examples, not the original pipeline, ThingML compilation, MQTT round trip, scientific novelty, or submission readiness.
 
 The incompatible red/yellow/white hue bounds are also outside the documented 0-179 domain for standard 8-bit HSV. The six-colour check illustrates this configuration issue; it is not a six-image biological dataset. The conceptual source interpretation is kept separate from potential corrections.
 
@@ -63,4 +62,4 @@ The short related-work discussion is contextual, not a systematic review or perf
 
 ## Explicitly unsupported claims
 
-No quantified growth-stage or health accuracy; no validated watering diagnosis; no reconstructed treatment dates; no independent biological replications inferred from frames or section sessions; no verified complete image dataset; no present end-to-end build or deployment; no demonstrated resource/yield gains; no regression superiority; no guarantee of acceptance or publication. Author approval and original thesis bibliographic metadata remain pending.
+No quantified growth-stage or health accuracy; no validated watering diagnosis; no reconstructed treatment dates; no independent biological replications inferred from frames or section sessions; no verified complete image dataset; no present end-to-end build or deployment; no demonstrated resource/yield gains; no regression superiority; no guarantee of acceptance or publication. Author approval and confirmation of the historical executed configuration remain pending.
