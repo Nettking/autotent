@@ -59,6 +59,10 @@ The same AI assistant prepared the initial reference labels and analysis. The su
 
 The original four diagnostic examples in `checks/` remain supplementary source-level examples. They are not the real-image validation and are not substituted for it. The main paper now reports the executed pilot rather than relying on unverifiable historical run quantities.
 
-## Public external references
+## Public external references and editorial additions
 
-The six bibliography entries are the pinned software, ThingML (Harrand et al., 2016; DOI 10.1145/2976767.2976812), the urban hydroponic twin (Jans-Singh et al., 2020; DOI 10.1017/dce.2020.21), the MODELS cyber-biophysical study (David et al., 2023), DarTwin/SysMLv2 (Haugen et al.; arXiv:2510.12478v1), and versioned OpenCV 4.0.0 colourspace documentation. Related work is contextual, not a systematic review or empirical benchmark comparison. Standard 8-bit HSV's hue domain 0–179 was rechecked in official OpenCV documentation for this pilot.
+The bibliography now has 14 public entries: 12 scientific papers, the pinned software repository, and versioned OpenCV documentation. `RELATED_WORK_SOURCES.md` records the eight added primary studies, their bibliographic identifiers, the material consulted, and the scope of each comparison. The comparison is targeted rather than systematic, and none of these external methods was newly benchmarked in this revision.
+
+The motivating example combines an explicitly illustrative grower decision with measurements already present in `pilot/records.zip`: A foreground fractions of 4.968% on 27 August and 4.004% on 30 August 2023. It adds no observed operator action, warning trace, treatment label, or causal interpretation. The existing public cultivation image is reused unchanged. The example's questions are returned to in the design and discussion, while section labels generate the introductory roadmap.
+
+All pilot data and code, original AI labels, human decisions, scores, exclusions, and the post-hoc crop subset remain byte-identical to the human-reference revision. Native state-model integration remains unexecuted. These editorial changes neither repair the application nor increase the validation evidence.

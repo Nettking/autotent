@@ -1,4 +1,4 @@
-# Strawberry monitoring candidate — human-reference update
+# Strawberry monitoring candidate — motivation and related-work revision
 
 **Image-Driven Monitoring of Indoor Strawberries: A Prototype and Retrospective Pilot**
 
@@ -54,3 +54,11 @@ The supplied labels belong to the original whole-scene sample. A post-hoc restri
 Native integration, a suitable state-level reference, and stronger measurement validation remain necessary for broader claims. The sample does not establish germination/seedling transitions; intervention dates do not support watering-cause validation. Confirm authorship, affiliation, venue, originality, data access and AI-use declarations before submission.
 
 No private source document is cited. Private photographs, reference crops, operational logs, cloud IDs, and the raw identifying review CSV are not released. Only public implementation material, normalized point decisions, and derived records are added. No PR, merge, deployment, submission or personal-website update is included.
+
+## Motivation and related-work revision
+
+The introduction now gives the problem, one research question, the contribution boundary, and a section-by-section roadmap. A dedicated motivating example asks how a grower could interpret a drop in measured green coverage. The example uses the existing 27/30 August measurements, clearly distinguishing an illustrative operator decision from executed software tests. The existing public cultivation photograph introduces the example; no new private image is released.
+
+Related work is organized around plant-image measurement, strawberry recognition/tracking/growth modelling, cultivation twins and software models, and data integration. Eight primary research papers are added, giving 14 bibliography entries in total (12 scientific papers, one software repository, and one documentation reference). A comparison table distinguishes their tasks and evidence from the pilot, without presenting them as executed benchmarks. `RELATED_WORK_SOURCES.md` records the primary sources and the limits of the comparisons.
+
+The human labels, frozen predictions, all numerical results, sampling/crop protocol, and native-integration status are unchanged. This revision changes the scientific framing and explanation; it does not add validation runs. The manuscript remains a candidate, not a venue-formatted or submission-ready version.
