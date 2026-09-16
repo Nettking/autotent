@@ -1,0 +1,143 @@
+{
+  "all_confirmed": true,
+  "checks": {
+    "csv_header_default_zero": {
+      "confirmed": true,
+      "input_areas": [
+        100,
+        200,
+        300
+      ],
+      "reader_values": {
+        "dark_green_pixel_count": 0,
+        "green_pixel_count": 0,
+        "light_green_pixel_count": 0
+      },
+      "writer_headers": [
+        "Image Index",
+        "Light_green Num Leaves",
+        "Medium_green Num Leaves",
+        "Dark_green Num Leaves",
+        "Light_green Total Pixel Count",
+        "Medium_green Total Pixel Count",
+        "Dark_green Total Pixel Count"
+      ]
+    },
+    "green_range_overlap": {
+      "confirmed": true,
+      "input_hsv": [
+        50,
+        60,
+        100
+      ],
+      "matching_channels": [
+        "medium_green",
+        "dark_green"
+      ]
+    },
+    "per_channel_zero_removal": {
+      "confirmed": true,
+      "input_series": [
+        [
+          7,
+          0,
+          9
+        ],
+        [
+          7,
+          8,
+          0
+        ]
+      ],
+      "plotted_series": [
+        [
+          7,
+          9
+        ],
+        [
+          7,
+          8
+        ]
+      ],
+      "retained_source_indices": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    "unreachable_rwy_hue": {
+      "confirmed": true,
+      "converted_hsv": [
+        [
+          0,
+          255,
+          255
+        ],
+        [
+          30,
+          255,
+          255
+        ],
+        [
+          0,
+          0,
+          255
+        ],
+        [
+          60,
+          255,
+          255
+        ],
+        [
+          120,
+          255,
+          255
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "input_rgb_names": [
+        "red",
+        "yellow",
+        "white",
+        "green",
+        "blue",
+        "black"
+      ],
+      "matching_pixel_counts": {
+        "red": 0,
+        "white": 0,
+        "yellow": 0
+      }
+    }
+  },
+  "environment": {
+    "numpy": "2.3.5",
+    "opencv": "4.13.0"
+  },
+  "schema": "autotent.paper.archived-operation-checks.v1",
+  "scope": "Constructed checks of manually transcribed source values/operations; not historical replay or biological validation",
+  "source_commit": "814bb768aa9994b59e17437cb4964cefd3d11b0f",
+  "sources": {
+    "green": {
+      "git_blob": "35b9d8ad2c2835f356d277adaf972bf28d78b7f9",
+      "path": "machine_learning/image_analysis/count_pixels/grid_count.py"
+    },
+    "rwy": {
+      "git_blob": "84536a29c7de8cc4ff5854be16c22efdb3803e61",
+      "path": "machine_learning/image_analysis/count_pixels/grid_count_rwy.py"
+    },
+    "sender": {
+      "git_blob": "2519469496f8dfe09399b972444df2f29ff5b8c2",
+      "path": "digital_twin/MQTT/communication/send_to_model.py"
+    }
+  }
+}
