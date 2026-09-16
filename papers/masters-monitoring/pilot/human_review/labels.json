@@ -1,0 +1,107 @@
+{
+  "schema": "autotent.human-point-reference.v1",
+  "reviewer_id": "R1",
+  "reviewer_role": "system developer and manuscript author",
+  "received_date": "2026-09-16",
+  "source_csv_sha256": "099a6435723e4966b61f6994fb1e939a566c523df2cf5cc0ec66052717117148",
+  "reference_points_sha256": "7534b20ad29ec264385a76a913046f645179d4f03cd5a27488a78c9082053cbe",
+  "notes": "Human labels exported from the original whole-scene worksheet. Dot means unreviewed, not background. Coordinates inherited from the hash-bound original sample. No AI labels substituted.",
+  "images": [
+    {
+      "image": "top_20230705.png.jpg",
+      "answers": ".....FBBBBFFBBBFFBBBBFFBBBBBFBBBBBBB"
+    },
+    {
+      "image": "top_20230720.png.jpg",
+      "answers": "BBBBFFBBBFFFBBBFBBBBBFFFBBBBBBBBBBBB"
+    },
+    {
+      "image": "top_20230805.png.jpg",
+      "answers": "BBBBBBBBBBFBBBBBFFBBBFBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230820.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230905.png.jpg",
+      "answers": "BBBBBBBBBBBFBBBBFFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230915.png.jpg",
+      "answers": "BBBBBBBBBBBFBBBBFFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20231020.png.jpg",
+      "answers": "BBBBBBBBBBBFBBBBFFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20231105.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20231120.png.jpg",
+      "answers": "BBBBBBBBBBBFBBBBBBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20231205.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20231220.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20240105.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20240120.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBFBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20240205.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    },
+    {
+      "image": "top_20240220.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    },
+    {
+      "image": "top_20240306.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    },
+    {
+      "image": "top_20230824.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230825.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230826.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230827.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBBBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230828.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230829.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230830.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    },
+    {
+      "image": "top_20230831.png.jpg",
+      "answers": "BBBBBBBBBBBBBBBBFBBBBBBBBBBFBBBBBBBB"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
-# Evidence register — executed pilot revision
+# Evidence register — human-reference revision
 
-Prepared 16 September 2026. No private document is a bibliographic dependency. The paper distinguishes design, source inspection, actual image execution, provisional reference agreement and unexecuted integration.
+Prepared 16 September 2026. No private document is a bibliographic dependency. The paper distinguishes design, source inspection, actual image execution, historical AI agreement, subsequent developer-provided human references, and unexecuted integration.
 
 ## Pinned public source
 
@@ -24,15 +24,15 @@ The copy at `pilot/archived/grid_count.py` is byte-identical and hash-checked be
 |---|---|
 | Prototype decomposition, state names/timers/messages | Public implementation and explicit design interpretation; not end-to-end execution |
 | 24 readable originals, dimensions and dates | `pilot/manifest.csv`; selected-file census only, private image bytes hash-checked |
-| 864 point labels; 41 F, 806 B, 17 U | Frozen `reference_points.csv`; AI-assisted, not human-reviewed |
+| Historical AI labels: 864 points; 41 F, 806 B, 17 U | Frozen `reference_points.csv`; AI-assisted, not human-reviewed |
 | Provisional flower/fruit witnesses | Frozen `reference_scenes.csv`; not_seen is not proof of absence |
-| TP35/FP0/FN6/TN806, pooled F1 .921 | Actual `points_scored.csv`, recomputable summary and per-frame scores; point agreement only |
+| Historical AI-reference TP35/FP0/FN6/TN806, F1 .921 | Actual `points_scored.csv`, recomputable summary and per-frame scores; point agreement only |
 | Method B/cutoff variants identical at sample points | Same scored points; dense masks differ, so not equal segmentation accuracy |
 | No red/yellow/white pixels on all 24 images | Literal archived HSV bounds applied to real decoded images; no corrected detector validation |
 | 71 nonzero values lost by original lookup | Exporter-style rows constructed from actual original-function measurements, original lookup expression |
 | 72/72 strict-mapped fields preserved | Actual observation envelopes from the new adapter; no native delivery or region mapping |
 | Repeatability | Second 24-image run: exact measurements/scores/envelopes excluding timing and run timestamps |
-| Fifteen passing artifact tests | Six original and nine pilot tests; not biological validation experiments |
+| 23 passing artifact tests | Six paper, nine original pilot, eight human rescoring tests; not biological validation experiments |
 | No causal watering/state accuracy claim | Intervention dates and suitable independently reviewed state references are unavailable |
 
 ## Frozen data identity
@@ -45,9 +45,17 @@ The ZIP is a compact transport for the original CSV/JSON bytes, not a replacemen
 
 Point labels were frozen before image-algorithm outputs at 09:18:27 UTC; scene labels at 09:28:18 UTC. First run was recorded at 09:28:29 UTC. `reference_freeze.json` retains the pre-run protocol digest. The public protocol received only a documented editorial privacy-wording amendment afterward; sampling and scoring rules were not changed. The labels remain unchanged after scoring.
 
+## Subsequent human point-reference pass
+
+`pilot/human_review/labels.json` records the received point decisions, with R1 denoting the system developer and manuscript author. Source CSV SHA-256: `099a6435723e4966b61f6994fb1e939a566c523df2cf5cc0ec66052717117148`. All original 864 image/point identities and coordinates match; 859 points are reviewed (64 F, 795 B), and the first five points in the first image are blank. No blank or uncertain value is imputed.
+
+`pilot/rescore_human.py` joins these decisions to predictions frozen in `pilot/records.zip`. No image-processing settings, model outputs or labels are changed. `pilot/human_review/results/summary.json` is reproducible from this join. Primary counts are TP36, FP1, FN28, TN794: precision 0.973, recall 0.563, F1 0.713. The human set differs from the original AI reference at 29 reviewed positions; both sets remain separate. The paper uses the human result as its primary point comparison.
+
+The requested region (right half, central 80% of original height) contains 288 of the old reviewed points. Its post-hoc subset counts are TP34, FP1, FN27, TN226; F1 0.708. This is not a new crop-processing run or replacement grid. The raw identifying CSV stays private; normalized labels retain every decision. See `pilot/human_review/REPORT.md` for interpretation and scope.
+
 ## Interpretation and privacy
 
-The same AI assistant prepared the reference labels and the analysis. No human/independent expert reference or complete blinding is claimed. No germination/seedling transition is observed in this sample; no whole-system plant-state accuracy, disease diagnosis, watering-cause result, agronomic gain or generalization across independent cultivation runs is established. No private image, reference crop, operational log, Drive ID or private document was uploaded to GitHub.
+The same AI assistant prepared the initial reference labels and analysis. The subsequent human point pass is by the system developer; it is not independent expert review or a fully blinded assessment. The scene-level references remain AI-only. No germination/seedling transition is observed in this sample; no whole-system plant-state accuracy, disease diagnosis, watering-cause result, agronomic gain or generalization across independent cultivation runs is established. No private image, reference crop, operational log, Drive ID or private document was uploaded to GitHub.
 
 The original four diagnostic examples in `checks/` remain supplementary source-level examples. They are not the real-image validation and are not substituted for it. The main paper now reports the executed pilot rather than relying on unverifiable historical run quantities.
 
