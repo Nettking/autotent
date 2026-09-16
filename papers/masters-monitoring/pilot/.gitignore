@@ -1,0 +1,9 @@
+__pycache__/
+manifest.csv
+sample.json
+reference_points.csv
+reference_scenes.csv
+reference_freeze.json
+scene_reference_freeze.json
+repeatability.json
+results/

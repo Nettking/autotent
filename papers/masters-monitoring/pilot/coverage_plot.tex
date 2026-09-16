@@ -1,0 +1,12 @@
+% Generated from pilot/results/frames.csv; no interpolation or fitted curve.
+\begin{tikzpicture}
+\begin{axis}[width=\linewidth,height=5.2cm,xmin=-4,xmax=251,ymin=0,ymax=18,
+ xlabel={Elapsed filename days},ylabel={Foreground (\%)},
+ xtick={0,50,100,150,200,245},legend style={at={(.98,.98)},anchor=north east,font=\small},
+ tick label style={font=\small},label style={font=\small}]
+\addplot+[only marks,mark=o] coordinates {(0,16.251149) (15,11.188638) (31,7.121621) (46,4.660303) (62,6.373566) (72,6.606760) (107,6.641780) (123,3.265680) (138,2.792284) (153,2.414109) (168,2.170360) (184,1.381261) (199,0.572368) (215,0.750493) (230,0.654838) (245,0.290612)};
+\addlegendentry{A: contour union}
+\addplot+[only marks,mark=+] coordinates {(0,15.885353) (15,11.112830) (31,7.079785) (46,4.638748) (62,6.344531) (72,6.565831) (107,6.623415) (123,3.159586) (138,2.794479) (153,2.342244) (168,2.128691) (184,1.386621) (199,0.579247) (215,0.751909) (230,0.655834) (245,0.293612)};
+\addlegendentry{B: binary union}
+\end{axis}
+\end{tikzpicture}

@@ -2,62 +2,58 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx,amsmath,amssymb,booktabs,tabularx,array}
-\usepackage{microtype}
-\usepackage{xurl}
+\usepackage{microtype,xurl}
 \usepackage[hidelinks]{hyperref}
-\usepackage{tikz}
+\usepackage{tikz,pgfplots}
 \usetikzlibrary{arrows.meta,positioning}
+\pgfplotsset{compat=1.18}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \newcommand{\code}[1]{\texttt{#1}}
 \setlength{\emergencystretch}{1.5em}
-\title{Image-Driven Plant-State Monitoring of Indoor Strawberries: A Prototype Implementation}
-\titlerunning{Image-Driven Plant-State Monitoring: Candidate Manuscript}
+\title{Image-Driven Monitoring of Indoor Strawberries: A Prototype and Retrospective Pilot}
+\titlerunning{Image-Driven Strawberry Monitoring: Retrospective Pilot}
 \author{Martin Arthur Andersen}
 \authorrunning{M. A. Andersen}
 \institute{Halden, Norway}
 \begin{document}
 \maketitle
-\begin{center}\small\textit{Candidate manuscript --- 16 September 2026. Not submitted.}\end{center}
+\begin{center}\small\textit{Candidate manuscript --- 16 September 2026. Not submitted.\\Pilot reference annotations await human review.}\end{center}
 \begin{abstract}
-This paper describes an indoor strawberry-monitoring prototype combining camera-derived colour measurements, a ThingML Plant State Model, and a Python monitor. Measurements are communicated as events; explicit states and guards encode assumptions about development and possible deterioration. We present the prototype's design and implementation, describe its original development tests, and examine a pinned version of the software repository. Accelerated replay and qualitative observations from development are distinguished from the present source inspection and four bounded software checks; they are not treated as independently validated plant classifications. The inspection identifies overlapping colour ranges, an incompatible colour-space configuration, loss of temporal information, and interface inconsistencies that prevent treating the preserved files as a verified end-to-end configuration. The contribution is a concrete implementation account and an analysis of the conditions required to interpret its outputs. The available evidence supports discussing the monitoring design, but not quantified growth-stage accuracy, diagnosis of watering stress, or agronomic benefit.
-\keywords{Plant monitoring \and Digital twin prototype \and ThingML \and Image processing \and Indoor cultivation}
+An image-driven plant monitor translates visible features into measurements and then interprets them as plant states. This paper presents an indoor strawberry prototype using colour-region extraction, a ThingML Plant State Model, and operator-facing monitoring. We evaluate its preserved image-processing functions on 24 original photographs: 16 calendar-spread frames and an eight-day sequence. A fixed grid yields 864 visually assessed points, of which 847 have provisional foreground/background labels. These labels were prepared through AI-assisted visual inspection before algorithm outputs and have not been reviewed by a human. The archived green extraction identifies 35 of 41 labelled foliage points, with six misses and no false positives among 806 background points; pooled point F1 is 0.921. This is preliminary reference agreement, not independent biological validation. The archived flower/fruit ranges return zero pixels in every image, despite provisional visual flower witnesses in 11 frames and red-fruit evidence in one. A separate strict adapter preserves all 72 extracted feature fields, whereas the unmodified header lookup turns them into zeros. The pilot establishes executable image measurements and concrete failure cases, but not successful native ThingML/MQTT integration, lifecycle classification, or diagnosis of watering stress.
+\keywords{Plant monitoring \and ThingML \and Image processing \and Retrospective evaluation \and Digital twin prototype}
 \end{abstract}
 
 \section{Introduction}
-A camera records visible appearance, an image processor produces configured measurements, and a state model interprets them using assumptions about development and elapsed time. These steps must remain distinguishable when an operator uses a report to decide whether to inspect a plant or adjust its environment.
+A camera records plant appearance; an image-processing routine measures configured regions; a state model interprets those measurements using assumptions about development and time. These are distinct steps. A program can execute a transition correctly even when its input does not measure the intended feature. Likewise, a numerical decline can be real in the image without identifying its biological cause.
 
-This paper presents an image-driven monitoring prototype for indoor strawberries. We combined cameras, environmental sensors, image processing, a Plant State Model, and a Python monitoring program. Rather than learning plant-state labels from an annotated image collection, the selected approach extracted colour-region measurements and supplied them to an explicit state model. Its intended output was a report about development or a possible deviation requiring attention.
+The indoor strawberry prototype considered here combines cameras, environmental sensing, image processing, a Plant State Model, and a Python monitor. Its image-driven path uses explicit colour ranges rather than a learned classifier. Feature observations are intended to drive named developmental states and warnings that an operator can inspect. The preserved implementation is available at a pinned repository revision~\cite{autotent}.
 
-The research question is: \emph{How can image-derived colour measurements support explicit, state-based monitoring of indoor strawberry cultivation?} We address the question through the concrete decomposition and implementation of the prototype, not through a claim that its colour segmentation is a new algorithm. The paper contributes an account of the observation-to-state pipeline, a traceable description of its model and interfaces, and a critical examination of the evidence available for interpreting its outputs.
+The research question is: \emph{To what extent do the prototype's image measurements support an interpretable plant-state monitoring pipeline?} The contribution is a concrete implementation account together with an executed, bounded image-component pilot. We examine the agreement of the green-region extraction with provisional visual references, the behaviour of the flower/fruit configuration on real photographs, and the preservation of measured values across a CSV interface. Colour thresholding itself is not proposed as a new algorithm.
 
-The evidence presented here comprises the original development observations, source inspection, and bounded software checks; no new cultivation experiment was conducted. Dates of the historical watering changes are unavailable for alignment with the recovered images. We therefore make no causal claim about detecting underwatering or overwatering.
-
-Environmental forecasting remains system context only. Regression comparisons, sensor maintenance, energy use, and noise measurements are outside this paper's contribution.
+The pilot uses a small, fixed sample from the original recording archive. Its reference annotations are AI-assisted and unreviewed. This permits transparent preliminary comparisons and identification of counterexamples, but does not supply an independent human or agronomic reference. The study also distinguishes execution of archived Python functions from execution of the native ThingML application. No result is presented as validated growth-stage or plant-health accuracy. Environmental forecasting, energy use, and sensor maintenance are outside the contribution.
 
 \section{Context and Related Work}
-Digital twins for cultivation can combine observations, models, and operator-facing information. Jans-Singh et al.~\cite{janssingh2020} describe an urban-integrated hydroponic farm in which wireless measurements and manual records inform a site-specific model and decision support. David et al.~\cite{david2023} discuss challenges and lessons from an industrial cyber-biophysical system in controlled-environment agriculture. These studies establish relevant application contexts; neither is an experimental comparator for the prototype considered here.
+Digital twins in cultivation combine observations, models, and decision-support functions. Jans-Singh et al.~\cite{janssingh2020} describe a site-specific twin of an urban-integrated hydroponic farm informed by wireless measurements and manual records. David et al.~\cite{david2023} discuss engineering challenges and lessons from an industrial cyber-biophysical system in controlled-environment agriculture. These works establish application contexts, not performance baselines for this prototype.
 
-ThingML provides a modelling language and configurable code-generation framework for heterogeneous targets~\cite{harrand2016}. The present prototype uses it to express the stateful interpretation of measurements. Its use does not make the biological assumptions in a statechart correct: code generation and state-transition execution address software behaviour, whereas correspondence with plant development requires separate evidence.
+ThingML provides a modelling language and code-generation framework for heterogeneous targets~\cite{harrand2016}. Here it represents stateful interpretation of image-derived measurements. Code generation does not validate the biological interpretation of a state: software execution, measurement validity, and correspondence with plant development require different evidence.
 
-Colour thresholding is an established image-processing operation. OpenCV documents conversion to HSV and range-based extraction of coloured regions~\cite{opencvcolour}. The choice here is to connect such measurements to explicit states and warnings. We do not report a comparison with neural-network classifiers or established phenotyping pipelines, and consequently make no claim of superior accuracy, computational efficiency, or annotation efficiency.
+OpenCV documents HSV conversion and range-based extraction of coloured regions~\cite{opencvcolour}. We use this established operation and study its integration into a monitoring pipeline. We do not compare against neural classifiers or a complete established phenotyping system. Consequently, we make no claim of superior accuracy, annotation efficiency, or computational efficiency over those approaches.
 
-The strawberry cultivation system also appears in the later DarTwin/SysMLv2 work by Haugen et al.~\cite{dartwin2025}, where it serves as a modelling example in an investigation of language-extension and tooling capabilities. The shared case is acknowledged. The present account concerns the earlier monitoring implementation, its observation interfaces, and the limits of its preserved evidence; it does not claim the cultivation case or a new digital-twin modelling language as a novel contribution.
+The same cultivation case appears in the later DarTwin/SysMLv2 work by Haugen et al.~\cite{dartwin2025}, which examines modelling-language formalization and tooling. The shared case is acknowledged. The present study addresses image measurements and implementation interfaces; it does not claim a new modelling language or the cultivation installation itself as a new contribution.
 
-\section{System Design}
-\subsection{Physical Setting and Intended Use}
-The installation comprised a compact indoor grow tent, cameras observing plants from above and from the side, environmental sensing, lighting, ventilation, and irrigation equipment. The image-processing part was intended to track changes in visible plant features. Environmental measurements supported a separate monitoring and forecasting path. Figure~\ref{fig:setting} shows an example frame already included in the public software repository; it is an illustration of the installation, not a reference annotation.
+\section{Prototype Design}
+\subsection{Setting and Intended Use}
+The installation uses a compact indoor grow tent, top and side cameras, environmental sensing, lighting, ventilation, and irrigation equipment. Figure~\ref{fig:setting} shows a frame already distributed in the public repository. The image-driven path is intended to report plant development or deviations for operator inspection. It does not establish autonomous irrigation or lighting adjustment from a state transition. We use \emph{digital twin prototype} for this observation-and-model design, not as a claim of a validated physiological simulation or autonomous control loop.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.68\linewidth]{figures/cultivation.jpg}
-\caption{Example cultivation image already distributed as \code{input.png} in the pinned repository~\cite{autotent}. The two visible pots illustrate the camera scene, not the number of independent plants or runs in the complete study. The image is not labelled as healthy, distressed, or a particular developmental stage.}
+\includegraphics[width=.57\linewidth]{figures/cultivation.jpg}
+\caption{Cultivation scene already public as \code{input.png} in the pinned repository~\cite{autotent}. The two visible large pots illustrate the setting, not the number of independent plants or cultivation runs. This image is not a plant-health reference label.}
 \label{fig:setting}
 \end{figure}
 
-Plant-state and environmental reports were intended for a human operator who could inspect the plants and decide whether to intervene. Although the installation included scheduled and remotely controllable equipment, the image-to-state path examined here does not establish automatic irrigation or lighting adjustment from a state transition. We describe the intended use as monitoring and support for human inspection. We use \emph{digital twin prototype} to describe the intended connection between the physical installation, its observations, and the Plant State Model, without claiming a validated physiological simulator or a demonstrated autonomous control loop.
-
-\subsection{Software Decomposition}
-Figure~\ref{fig:pipeline} summarizes the functional design. The image processor isolates configured colour regions and derives numerical features. The Plant State Model maintains a developmental interpretation and can report a distress-related state. The Python monitoring component associates states with environmental conditions and reports deviations. Acquisition, interpretation, and reporting have separate responsibilities.
+\subsection{Observation, Interpretation, and Reporting}
+The design separates feature extraction from state interpretation (Fig.~\ref{fig:pipeline}). Configured colour regions yield numerical measurements. A ThingML model maintains a state and emits a report. A Python monitor combines state-related information with an environmental-monitoring path. These interfaces must agree on units, feature names, region identifiers, and time.
 
 \begin{figure}[t]
 \centering
@@ -69,23 +65,29 @@ Figure~\ref{fig:pipeline} summarizes the functional design. The image processor 
 \node[box] (mon) at (4,-2) {Python monitor\\and forecaster};
 \node[box] (human) at (8,-2) {Reports to\\human operator};
 \draw[arr] (cam)--(feat);
-\draw[arr] (feat)--node[above=6mm,font=\scriptsize]{feature events}(state);
+\draw[arr] (feat)--node[above=5mm,font=\scriptsize]{feature events}(state);
 \draw[arr] (sensors)--(mon);
 \draw[arr] (state.south west)--node[above,sloped,font=\scriptsize]{plant state}(mon.north east);
 \draw[arr] (mon)--(human);
 \end{tikzpicture}
-\caption{Functional decomposition of the monitoring prototype. Arrows express the intended information flow, not a claim that the archived files have been executed together in this configuration. Environmental forecasting is context only and is not evaluated in this paper.}
+\caption{Intended information flow. The executed pilot covers top-camera feature extraction and a separate typed observation adapter. It does not execute the native ThingML/MQTT path or evaluate environmental forecasting.}
 \label{fig:pipeline}
 \end{figure}
 
-The sender and receiver must agree on feature names, units, region identifiers, topics, and timing; colocating their files does not establish these agreements.
+The archived Plant State Model contains \code{Germination}, \code{Seedling}, \code{Growing}, \code{Fruting}, and two distress-related states~\cite{autotent}. The spelling \code{Fruting} is preserved in the source; an emitted report uses \code{Fruiting}. The first two states use 10- and 14-day timers. Green measurements and additional colour evidence appear in transition guards. These are implementation settings and interpretations, not validated agricultural timing limits. Startup in \code{Germination} does not establish the actual age of plants already visible in an image.
 
-\section{From Images to State Reports}
-\subsection{Colour-Region Measurements}
-The image-processing method consists of cropping, colour-range selection, morphological operations, contour filtering, and export of measurements to CSV. The inspected \code{grid\_count.py} converts the cropped image to HSV~\cite{autotent}. Table~\ref{tab:ranges} records the literal HSV configuration without recalibration.
+An observation is declared internally as
+\begin{equation}
+\code{messages}(\mathrm{section\_id},\mathrm{msg\_type},\mathrm{msg\_txt},\mathrm{value}).
+\end{equation}
+A separate $\code{reply}(\mathrm{id},\mathrm{content})$ declaration carries reports. Capture time is not an explicit field. The pilot's whole-scene measurements are therefore not silently assigned to either of the model's two section sessions or delivered as if a verified region mapping existed.
+
+\section{Image Processing and Reproduction Boundaries}
+\subsection{Archived Green Measurements}
+We pin \code{grid\_count.py} to Git blob \code{35b9d8ad2c28} and verify its complete hash before execution. The script crops the rightmost 100 columns, converts the image to HSV, and constructs the three masks in Table~\ref{tab:ranges}. Closing followed by opening uses a $7\times7$ kernel, with two iterations per operation. External contours are retained when their area is greater than an interactive threshold $\tau$.
 
 \begin{table}[t]
-\caption{Green-channel bounds in the inspected \code{grid\_count.py}. Labels are preserved source names, not independently validated leaf-colour classes. Bounds are inclusive.}
+\caption{Literal archived HSV bounds. These source labels are not calibrated leaf-maturity classes. All bounds are inclusive.}
 \label{tab:ranges}
 \centering
 \begin{tabular}{lrrr}
@@ -99,115 +101,129 @@ Source label & Hue & Saturation & Value\\
 \end{tabular}
 \end{table}
 
-The script removes the rightmost 100 image columns, forms one mask per configured range, and applies closing followed by opening with a $7\times7$ kernel and two iterations for each operation. It then extracts external contours and retains those whose area exceeds an interactively supplied threshold $\tau$. The value returned under the name \code{total\_pixel\_count} is
+The output named \code{total\_pixel\_count} is the sum of retained contour areas,
 \begin{equation}
- A_c(I)=\sum_{q\in C_c(I):\,\operatorname{area}(q)>\tau}\operatorname{area}(q),
- \label{eq:area}
+ A_c(I)=\sum_{q\in C_c(I):\operatorname{area}(q)>\tau}\operatorname{area}(q),
 \end{equation}
-where $C_c(I)$ denotes the external contours after preprocessing for channel $c$. Equation~\ref{eq:area} describes the inspected implementation; it is not a new estimator. Summed contour area is not the same operation as counting non-zero mask elements. Similarly, the number of surviving contours is not necessarily a count of anatomically distinct leaves.
+not a direct count of non-zero mask elements. The returned contour count is likewise not automatically a count of anatomical leaves. Medium-green is contained within dark-green, so adding channel memberships duplicates some foreground locations.
 
-The medium-green bounds are contained within the dark-green bounds, so summing channels does not yield a unique total green area. Their names are not a calibrated ordering of leaf maturity. Camera distance, cropping, occlusion, background, and the area threshold affect the output. During development, the threshold was adjusted when camera distance changed. A complete, date-indexed configuration history is not available, so the same numerical setting cannot be assumed for every historical recording.
+For point assessment, method A fills each retained external contour and takes the union across channels. This scoring mask is reconstructed from the archived operations; the original function returns areas and counts, not a complete segmentation-label image. Its filled regions can include holes that are not leaf tissue. We preserve this distinction when reporting area and pixel measurements.
 
-The intended extension to red, yellow, and white was to provide evidence about flowers and berries. However, the separate \code{grid\_count\_rwy.py} uses HSV conversion together with lower hue bounds of 220 for white and 255 for red and yellow. Those bounds lie outside the documented standard 8-bit HSV hue range of 0--179~\cite{opencvcolour}. This configuration cannot support a verified flower/fruit detection claim as preserved. Correcting it would constitute a separately recorded implementation change, not reproduction of the archived configuration.
+\subsection{Explicit Pilot Variants and Interface Correction}
+The historical interactive cutoff is unknown. We fix $\tau=100$ for A and examine $\tau=0$ and $1000$ without tuning against reference scores. Method B is a separately identified measurement variant: it unions the raw green ranges before the same morphology, retains the resulting binary pixels and holes, and omits contour-area filtering. B is not a recovered historical configuration, a learned model, or a controlled one-factor ablation.
 
-\subsection{The Plant State Model}
-The model receives feature-related messages and updates an explicit state. We modelled a progression through germination, seedling, growth, and fruiting, with warnings when expected progress is absent or measurements suggest deterioration. Table~\ref{tab:states} summarizes the intended interpretation. These are modelling assumptions, not biological ground-truth categories established by the present work.
+The separate archived red/yellow/white script converts to standard 8-bit HSV, but its lower hue bounds are 220 for white and 255 for red and yellow. These lie outside the documented hue domain of 0--179~\cite{opencvcolour}. We execute these literal bounds on each real pilot image. We do not tune a replacement detector after inspecting the visual references.
+
+The green exporter names columns such as \code{Light\_green Total Pixel Count}. The preserved sender instead requests \code{light\_green\_pixel\_count}, defaulting absent keys to zero. A new strict adapter maps the three declared exporter fields to the expected feature names, preserves floating-point values, and rejects missing, non-finite, or negative measurements. Each new observation envelope retains the filename, filename-derived date, image hash, units, and whole-frame scope. This is an offline interface correction, not native MQTT delivery.
+
+\section{Retrospective Pilot Method}
+\subsection{Fixed Sample and Reference Procedure}
+The sample comprises 24 original top-camera JPEG files of $3280\times2464$ pixels, including 16 calendar-spread dates from 5 July 2023 to 6 March 2024 and eight consecutive filename dates, 24--31 August 2023. Selection was fixed from the accessible file listing before algorithm outputs; it was not randomized from a completed archive census. Previously viewed endpoint and August 31 previews were not treated as unseen material. All selected files decoded successfully and were retained. The manifest records byte hashes, dimensions, and available embedded timestamps. Dates in the plots come from filenames; no treatment times are inferred.
+
+After the 100-column crop, a fixed $6\times6$ grid covers the $3180\times2464$ frame. For column $j$ and row $i$, zero-based coordinates are
+\begin{equation}
+ x_j=\left\lfloor(j+\tfrac12)3180/6\right\rfloor,\qquad
+ y_i=\left\lfloor(i+\tfrac12)2464/6\right\rfloor.
+\end{equation}
+Each point is provisionally labelled F for clearly visible green strawberry leaf tissue, B for other material, or U for uncertain boundaries, colour, occlusion, or plant identity. Visual inspection used original-image context patches with no algorithm overlays or measurements. Separate scene observations record visible foliage, flower witnesses, and red-fruit witnesses; ``not seen'' is not scored as proof of biological absence.
+
+All 864 point labels and the scene observations were frozen, hashed, and timestamped before the first image-algorithm run. No label was changed after scoring. They were prepared by an AI assistant and have not been reviewed by a human or botanical expert. The same assistant prepared the harness while having access to the method description, so this is not fully blinded or independent validation. A private offline worksheet permits a later human assessment without displaying predictions or the provisional answers.
+
+\subsection{Execution and Measures}
+The harness loads only hash-verified archived image functions, bypassing interactive prompts and top-level directory/plotting commands. It executes the original \code{count\_leaves} on each image at $\tau=100$. A separate scoring path must reproduce its three contour counts and three area values exactly. This agreement is a reproduction check, not an independent correctness oracle.
+
+We score A and B at the same grid coordinates. Uncertain points are excluded from the main confusion counts. We report precision, recall, and F1 using F as the positive class, along with an all-background baseline to expose class imbalance. These are point-sample measures, not dense-mask intersection-over-union or developmental-state accuracy. Results are also separated by calendar-spread and consecutive-sequence samples. As a sensitivity analysis, uncertain labels are assigned wholly against or in favour of each prediction; these bounds are not confidence intervals.
+
+For each frame we retain the three contour-area outputs, contour counts, union foreground fraction, and literal red/yellow/white match counts. We apply the preserved sender's key/default expression to the real exported values and compare it with the strict adapter. The executed environment is Python 3.13.5, OpenCV 4.13.0, NumPy 2.3.5, and Pillow 12.3.0. This is the pilot environment, not an assertion about the original installation.
+
+Native ThingML execution was attempted as a preparation step but not reached: the binary could not be transferred into the execution environment through the available retrieval paths. No application-startup failure is inferred from that access problem. The pilot does not substitute a new state-machine implementation and call it the original. MQTT topic, reply-type, guard, initialization, and timing reconciliation remain outside the completed execution.
+
+\section{Results}
+\subsection{Agreement on Visible Foliage Points}
+Of 864 points, 41 were labelled F, 806 B, and 17 U. Method A at $\tau=100$ produced 35 true positives, six false negatives, no false positives, and 806 true negatives on the 847 assessed points. Pooled precision was 1.000, recall 0.854, and F1 0.921 (Table~\ref{tab:agreement}). These values describe agreement with the unreviewed AI-assisted references, not expert-confirmed monitoring accuracy.
 
 \begin{table}[t]
-\caption{Intended interpretation of the Plant State Model. This summarizes the design, not a verified transcription of every implementation guard.}
-\label{tab:states}
+\caption{Provisional point agreement for A at $\tau=100$. B and A at $\tau=0,1000$ give identical predictions at these grid points, not identical dense masks. U points are excluded. No human reference review has occurred.}
+\label{tab:agreement}
+\centering
+\begin{tabular}{lrrrrrr}
+\toprule
+Sample & Assessed & F points & TP & FN & Recall & F1\\
+\midrule
+Calendar-spread (16) & 560 & 27 & 25 & 2 & .926 & .962\\
+Consecutive (8) & 287 & 14 & 10 & 4 & .714 & .833\\
+All frames (24) & 847 & 41 & 35 & 6 & .854 & .921\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All-background prediction obtains 95.2\% point accuracy while finding none of the foliage points. Therefore the observed 99.3\% overall accuracy of A is not an appropriate headline. Moreover, four of its six misses are at the same grid coordinate on four consecutive dates. They are correlated observations, not four independent cultivation failures. The other misses occur on 20 July and 20 August.
+
+B and both alternative cutoffs produce the same labels at the sampled points. This does not establish equivalent boundary quality or dense area accuracy: their binary masks and foreground fractions differ. Assigning the 17 uncertain points adversarially or favourably gives pooled F1 bounds of 0.753--0.925. The small positive count and unresolved labels therefore matter despite the apparently high pooled score.
+
+\subsection{Temporal Measurements and Limits of Interpretation}
+Figure~\ref{fig:coverage} shows the foreground fraction for the 16 calendar-spread frames. It is the fraction of the entire cropped camera scene, including background, not a calibrated measure of plant area. Measurements are shown at observed dates without filling recording gaps or adding watering-phase labels.
+
+\begin{figure}[t]
+\centering
+\input{pilot/coverage_plot.tex}
+\caption{Measured green foreground on the 16 calendar-spread frames. Day 0 is 5 July 2023. A is the filled union of retained external contours; B retains the binary mask. Points are not joined across unobserved intervals. Perspective, occlusion, and scene composition can change the measurement; no causal watering interpretation is assigned.}
+\label{fig:coverage}
+\end{figure}
+
+Across the eight consecutive dates, A's foreground fractions were 4.311, 5.198, 5.301, 4.968, 4.772, 4.720, 4.004, and 4.280\%. The sequence includes increases and decreases rather than a monotonic stage progression. Provisional visual records contain flower witnesses on all eight dates. Such observations do not establish that every decrease should produce a distress state.
+
+The ratio of summed filled-channel memberships to the filled union ranges from 1.019 to 1.932, with a median of 1.310. Thus the archived channels cannot simply be added to obtain unique green coverage. This ratio compares pixel memberships with pixel memberships, rather than conflating contour area and raster counts. It does not estimate biological growth.
+
+\subsection{Flower/Fruit Counterexamples and Measurement Hand-off}
+Every literal archived red/yellow/white range returned zero matching pixels on all 24 photographs. The provisional references nevertheless contain flower witnesses in 11 frames and a red-fruit witness in one frame. These are real-image counterexamples to the preserved configuration, consistent with its incompatible hue domain. They are not a validated replacement flower detector or a full fruiting-state evaluation.
+
+The 24 green extractions yielded 72 exported fields, 71 of which were non-zero. Applied to these rows, the preserved sender's key/default expression returned zero for all 72 requested fields. The new strict adapter retained all 72 values exactly as floating-point observations (Table~\ref{tab:execution}). No section mapping, MQTT delivery, or state-transition correctness follows from that successful hand-off.
+
+\begin{table}[t]
+\caption{Executed component checks on real pilot data, with explicit boundaries. These outcomes do not constitute native end-to-end application validation.}
+\label{tab:execution}
 \small
 \begin{tabularx}{\linewidth}{@{}lYY@{}}
 \toprule
-State & Intended evidence & Interpretation boundary\\
+Component & Measured result & Interpretation\\
 \midrule
-Germination & Initial state; timeout if expected progress does not occur. & Starting the program does not establish the actual age of a plant.\\
-Seedling & Visible side-camera growth or configured green measurements. & Visibility and camera geometry affect the observation.\\
-Growth & Green-region measurements associated with developing foliage. & Projected image area is not biomass or physiological health.\\
-Fruiting & Additional colour evidence intended to indicate flowers or berries. & Colour alone does not establish the object or ripeness.\\
-Distress-related & Timeout or a feature decline interpreted by a guard. & A warning does not identify the cause of a change.\\
+Archived green functions & All 24 images executed; area/count reconstruction matched exactly. & Confirms harness consistency with the pinned functions.\\
+Flower/fruit bounds & All three channels zero on 24/24 frames. & Preserved configuration cannot measure the visual witnesses.\\
+Original CSV lookup & 71 non-zero values become zeros; all 72 requested values are zero. & A header mismatch silently loses measured information.\\
+Strict adapter & 72/72 values preserved exactly. & Offline typed hand-off, not delivery to ThingML.\\
+Native state path & Not executed. & No state accuracy or MQTT integration result.\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The pinned ThingML source contains the states \code{Germination}, \code{Seedling}, \code{Growing}, and \code{Fruting}, with two distress-related states. The spelling \code{Fruting} is present in the source, while an emitted report uses \code{Fruiting}. The terminal developmental category was intended to use flower- or fruit-related colour evidence. A transition to that software category must not be equated with independently confirmed flowering, fruit set, or ripeness.
+A second complete image run reproduced the scored-point, per-frame-score, and observation files byte-for-byte. Frame measurements also matched exactly apart from recorded processing times; summaries matched apart from run timestamps. Fifteen artifact/regression tests pass across the original diagnostic and new pilot suites. These checks establish repeatability and internal consistency of this small evaluation, not the truth of its reference labels.
 
-The implementation starts germination and seedling timers with durations of 10 and 14 days, respectively, and uses a configurable fruit-related threshold whose archived default is 10. It also creates two section sessions. These settings establish software configuration, not the number of independent biological experiments or validated agricultural timing limits~\cite{autotent}.
+\section{Discussion and Threats to Validity}
+\subsection{What the Pilot Establishes}
+The prototype offers an inspectable separation between observations and state interpretation. The pilot adds executed evidence to that design: the archived Python extraction runs on recovered originals, measurable agreement and misses can be reported, and a concrete interface correction prevents silent loss of real measured values. It also establishes a negative result: the preserved flower/fruit bounds yield no evidence for a state model to interpret, even when provisional visual witnesses are present.
 
-Some guards mix conjunction and disjunction without explicit grouping. In the growth-to-distress transition, an incoming \code{green\_pixel\_count} is compared with a stored \code{current\_light\_green\_pixel\_count}; the late-distress return transition also uses a less-than comparison. We do not replace these expressions with the intended rules in Table~\ref{tab:states} or claim their compiled behaviour has been established. Resolving the guard semantics and the relationship between model source and generated executable is a remaining implementation task.
+The answer to the research question is therefore component-specific. Green extraction supplies interpretable scene measurements with preliminary point agreement, but those measurements do not yet support a validated lifecycle or distress report. Explicit states make assumptions inspectable; they do not compensate for incompatible feature extraction, missing observation metadata, or unverified interfaces.
 
-\subsection{Messages, Reporting, and Replay}
-The internal ThingML declaration represents an observation as
-\begin{equation}
- \code{messages}(\mathrm{section\_id},\mathrm{msg\_type},\mathrm{msg\_txt},\mathrm{value}),
-\end{equation}
-and defines a separate $\code{reply}(\mathrm{id},\mathrm{content})$ message. The declaration contains no explicit capture timestamp~\cite{autotent}. This is relevant to replay: a model can receive the same numerical sequence at a different rate and experience different timer behaviour.
+\subsection{Reference and Sampling Validity}
+AI-assisted reference labels are the main limitation. Their preparation before algorithm outputs avoids direct copying of predictions, but does not make them human-reviewed, botanically verified, or independent of the method's description. A new human assessment may change the scores. The released records retain the initial labels and their uncertainty rather than retroactively improving them.
 
-During development testing, CSV-derived MQTT messages were replayed five seconds apart, with germination and seedling timers accelerated by a factor of 1440. These recorded settings have not been reproduced here, and their time mapping is not established to preserve the original capture intervals. Missing dates cannot be treated as observed zero growth, and a daily filename is not evidence of uniformly spaced measurements.
+The grid is sparse and background-heavy. It samples only 41 positive points across 24 frames, may miss small flowers or berries entirely, and cannot estimate detailed segmentation boundaries. Its fixed geometry can repeatedly sample the same leaf or background position. Repeated points and repeated photographs are not independent biological replicates; no confidence interval based on pixel independence is claimed. The 16-frame and eight-frame groups must not be treated as independent cultivation datasets.
 
-The preserved files also expose interface differences. The image exporter writes human-readable CSV headers such as \code{Light\_green Total Pixel Count}. The inspected sender expects \code{light\_green\_pixel\_count} and defaults absent keys to zero. Its MQTT topic names differ from those in the ThingML platform-specific model, and the PIM's reply declaration differs from the PSM's receiving message declaration. The preserved files therefore require an identified adapter or reconciled configuration before end-to-end reproduction.
+The original algorithm was developed during the recording project, so this retrospective sample is not a newly collected external test set. Exact historical threshold settings and configuration changes are unknown. There was no tuning against the pilot scores, but that alone does not establish historical hold-out status. The top-camera-only selection also leaves side-camera performance untested.
 
-\section{Evidence and Observations}
-\subsection{Evidence Sources and Method}
-The original development observations in Section~\ref{sec:development} are qualitative records; their underlying runs have not been independently reproduced. For source inspection, we use the public repository at commit \code{814bb768aa99}; the complete identifier and file hashes are recorded in the accompanying evidence register~\cite{autotent}. Four small checks then exercise values and operations transcribed from the inspected files. These checks are software-level examples, not experiments on plant-state accuracy.
+\subsection{State Interpretation and Reproducibility}
+The sample begins with developed foliage and does not cover observed germination-to-seedling transitions. Visual flowers and fruit may coexist with vegetative growth; their presence does not provide a complete, mutually exclusive state labelling. No independently reviewed chronological plant-state sequence was established. The present work consequently cannot estimate state-transition accuracy or stress-detection delay.
 
-Recovered camera material provides supplementary evidence that dated originals survive. The two inspected endpoint files are dated 5 July 2023 and 6 March 2024. This establishes neither uninterrupted coverage nor a count of valid observations. The July frame is byte-identical to the already-public example image used in Figure~\ref{fig:setting}. The later frame and private archive are not redistributed with this candidate.
+Missing watering dates prevent treatment-aligned evaluation. Changes in lighting, viewpoint, occlusion, or visible canopy can alter green measurements without establishing disease or watering stress. Plant continuity across the full recording period has not been verified. The results do not demonstrate improved yield, reduced resource use, or better operator decisions.
 
-The recovered capture script records a startup acquisition and subsequent daily acquisition at 07:59 in that version. It also writes a general acquisition message after attempting both cameras, even when one camera operation reports failure. The surviving log contains such partial-success cases. These observations justify distinguishing capture attempts from readable image files; they do not establish a complete failure rate for the archive. The script and log were inspected, not executed to contact the installation.
-
-\subsection{Original Development Tests and Observations}
-\label{sec:development}
-During the original project, we recorded hourly environmental sensor data over a reported period of 258 days. Six days of image data were recorded as unusable because of the lighting schedule, and the image-capture lighting interval was changed from one minute to five minutes. The development records refer to 252 days' worth of images. These quantities describe the original collection account, not a verified inventory of the recovered files. Hourly environmental sensing does not establish hourly image capture.
-
-Development testing of the Plant State Model included replayed transitions, timeout-related distress indications, and two initial messages to move out of the default initialization when a scenario began with plants already in the growth stage. The recorded qualitative observations were that the tested transitions and timeout indications occurred as expected. A simulated underwatering scenario was recorded as producing distress on its first day, with a return to growth under improved conditions. These observations were made by the developer; they are not estimates of classification accuracy, and no independently annotated test set, per-class sample counts, or error estimates accompany them.
-
-The original watering experiment involved a sequence of normal conditions, stopped watering, light watering, and overwatering. Green-measurement trajectories were interpreted in relation to that sequence during development. The intervention dates are not available for alignment with the recovered images. We therefore do not assign treatment labels to particular recovered photographs, estimate treatment-specific detection delay, or infer the intervention dates from colour decline. Doing so would use the monitor's own signal as its reference rather than provide independent validation.
-
-\subsection{Bounded Software Checks}
-The supplementary checker exercises explicitly transcribed source fixtures without acquisition, actuation, broker communication, or model compilation. Table~\ref{tab:checks} reports the executed checks.
-
-\begin{table}[t]
-\caption{New software-level checks, not biological validation. Inputs are constructed fixtures derived from the inspected source configuration and operations.}
-\label{tab:checks}
-\small
-\begin{tabularx}{\linewidth}{@{}lYY@{}}
-\toprule
-Check & Constructed input & Observed consequence\\
-\midrule
-Colour overlap & HSV value $(50,60,100)$ with the green bounds in Table~\ref{tab:ranges}. & Matches both medium-green and dark-green ranges.\\
-Hue domain & Red, yellow, white, green, blue, and black RGB pixels converted to standard 8-bit HSV. & All six yield zero matches in every archived red/yellow/white range.\\
-CSV hand-off & A non-zero row under the exporter-style headers, read with the sender's expected keys and defaults. & All three requested green measurements become zero.\\
-Temporal plotting & Two channels $[7,0,9]$ and $[7,8,0]$ with the source's per-channel zero filtering. & Both become two-element series; their second elements represent different original observations.\\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The hue result is not evidence that the sampled plants had no flowers or fruit. It is the consequence of an incompatible configuration; the documented domain also rules out those hue lower bounds beyond the six example colours. The CSV result demonstrates a possible silent conversion of missing fields into apparent measurements. The plotting example shows why ordinal plot positions cannot establish calendar alignment after channel-specific filtering. The source also iterates over directory entries without explicit sorting, further limiting chronological interpretation of its unmodified plots.
-
-These checks do not prove that the inspected configuration produced the historical results. Conversely, reported historical success does not establish consistency of the preserved files. End-to-end reproduction requires identification of the executed version and configuration.
-
-\section{Discussion and Limitations}
-\subsection{What the Prototype Contributes}
-The design provides a concrete answer to the research question: colour measurements can be represented as named observations, supplied to a stateful model, and translated into reports alongside environmental monitoring. An explicit state model makes initialization, timeouts, transitions, and recovery rules inspectable. This is useful as an implementation structure, but its usefulness for growers has not been evaluated in a user study.
-
-The case also shows why the distinction between measurements and interpretations matters. A decline in a colour-region measure may trigger a model rule, but the trigger does not reveal whether the cause was a change in plant appearance, camera position, illumination, segmentation configuration, or missing input. Distress-related state names should therefore be read as the model's classifications, not independently established diagnoses.
-
-Three engineering implications follow from the inspected artefacts. A measurement record should retain its image identity, capture time, camera position, region, and configuration. Missing fields should remain distinguishable from numerical zero. Replay should have an explicit time mapping and an initialization procedure suitable for the observed sequence. These are recommendations from the present inspection, not features claimed to have been implemented in the historical prototype.
-
-\subsection{Limits of the Evidence}
-\textbf{Measurement validity.} There are no independent region masks or developmental reference labels in this candidate evaluation. Contour counts may merge overlapping leaves or include non-plant regions. Projected colour area is not calibrated physical leaf area. The overlapping ranges and incompatible flower/fruit configuration require attention before stronger interpretation is warranted.
-
-\textbf{Historical reproducibility.} The development-test records, inspected source snapshot, generated executable, recovered images, and capture configuration have not been linked into one verified execution history. The colour-space configuration, terminal-state interpretation, message interfaces, and replay settings require reconciliation with the version actually executed. The checks preserve these discrepancies rather than silently repairing them. No current end-to-end ThingML/MQTT execution is claimed.
-
-\textbf{Causality and generalization.} Missing intervention dates prevent treatment-aligned analysis. The recovered frame count and plant continuity have not been established, and repeated photographs are not independent growing experiments. The work cannot support generalization across strawberry varieties, cultivation sites, or disease conditions. It also cannot demonstrate improved yield, reduced water use, or better decisions.
-
-\textbf{Study design.} The original method was developed during the same project that generated the images. A later split of that archive would not make it an independently collected validation dataset. The present checks examine a few definite software properties; they are neither a systematic test suite for the entire application nor an empirical estimate of monitoring effectiveness.
+Finally, the executed boundary stops at feature envelopes. The preserved ThingML source includes guards that mix conjunction and disjunction without explicit grouping, a green-versus-light-green comparison, and message declarations that require reconciliation with the sender and platform-specific model~\cite{autotent}. Neither correcting these expressions nor compiling a substitute would reproduce the original execution history. A native integration run and suitable state references remain necessary before extending the pilot's claims to the complete plant-state pipeline.
 
 \section{Conclusion}
-The indoor strawberry prototype illustrates a concrete approach to image-driven monitoring: extract configured colour-region measurements, communicate them as events, and interpret them through an explicit Plant State Model connected to operator-facing monitoring. Development observations are qualitative; the preserved software makes assumptions and integration requirements inspectable. The present inspection and bounded checks expose conditions that must be resolved before claiming a reproducible end-to-end implementation. The contribution is therefore a prototype implementation account with explicit evidence limits, not a validated plant-health classifier or proof of agronomic benefit.
+The prototype connects configured colour measurements to an explicit plant-state monitoring design. A 24-image retrospective pilot now executes the archived extraction, records provisional visual-reference agreement, and tests a strict measurement adapter on actual extracted values. It finds both usable green measurements and definite limitations in flower/fruit configuration and data hand-off. The central distinction is between reproducible feature extraction and validated state interpretation: the former has bounded execution evidence, whereas the latter remains unestablished. Human reference review and native integration are required before presenting the system as a validated plant-state monitor.
 
 \subsubsection*{Availability and manuscript status.}
-The historical software is public~\cite{autotent}; this candidate adds manuscript source, an evidence register, and bounded checks on a separate branch. Private images and logs are not released. Author review of metadata, authorship, venue, and implementation issues remains pending. Generative AI assisted drafting, source inspection, and preparation of the checks; this candidate has not been approved for submission.
+Public software is pinned in the repository~\cite{autotent}. The paper branch includes the pilot protocol, selected-frame hashes, frozen provisional labels, per-frame measurements, scored points, repeatability records, and offline code. Private camera images, reference crops, and operational logs are not redistributed; full image reruns require authorized access to those originals. No private source document is a bibliographic dependency. Generative AI assisted drafting, visual reference preparation, source inspection, and coding. No human reference review, coauthor approval, venue selection, or submission is implied by this candidate.
 
 \bibliographystyle{splncs04}
 \bibliography{references}

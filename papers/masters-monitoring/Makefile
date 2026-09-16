@@ -2,8 +2,7 @@ PYTHON ?= python3
 PDFLATEX ?= pdflatex
 BIBTEX ?= bibtex
 
-.PHONY: pdf check test clean
-
+.PHONY: pdf check test records pilot clean
 pdf:
 	mkdir -p build
 	$(PDFLATEX) -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
@@ -11,11 +10,19 @@ pdf:
 	$(PDFLATEX) -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
 	$(PDFLATEX) -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
 
+records:
+	$(PYTHON) pilot/unpack_records.py
+
 check:
 	$(PYTHON) checks/check_archived_operations.py
 
-test:
+test: records
 	$(PYTHON) -m unittest discover -s checks -v
+	$(PYTHON) -m unittest discover -s pilot -v
+
+pilot: records
+	@test -n "$(IMAGES)" || (echo 'Set IMAGES=/absolute/path/to/originals'; exit 1)
+	$(PYTHON) pilot/run_pilot.py --images "$(IMAGES)" --output build/pilot-rerun
 
 clean:
-	$(PYTHON) -c "import shutil; shutil.rmtree('build', ignore_errors=True)"
+	rm -rf build
